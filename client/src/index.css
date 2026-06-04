@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-dusco: #F22122;
+  --color-dusco-dark: #D41E1F;
+  --color-dusco-light: #FEE2E2;
+  --color-dark: #1A1A1A;
+  --color-dark-soft: #2D2D2D;
+  --color-surface: #FAFAFA;
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --font-sans: 'DM Sans', sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-dark);
+  background: #FFFFFF;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--color-dusco);
+  outline-offset: -1px;
+}
+
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
+.tabular-nums { font-variant-numeric: tabular-nums; }
