@@ -24,7 +24,7 @@ export default function Earnings() {
   return (
     <div className="flex-1 flex flex-col overflow-y-auto">
       {/* Hero */}
-      <div className="bg-gradient-to-br from-dusco to-dusco-dark px-6 pt-6 pb-8 text-white">
+      <div className="hero-gradient px-6 pt-6 pb-8 text-white">
         <p className="text-xs text-white/70 mb-1">Projected Annual Dividend</p>
         <motion.h2 initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
           className="font-heading text-3xl font-bold">

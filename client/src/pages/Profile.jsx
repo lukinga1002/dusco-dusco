@@ -30,7 +30,7 @@ export default function Profile() {
   return (
     <div className="flex-1 overflow-y-auto">
       {/* Profile header */}
-      <div className="bg-gradient-to-br from-dusco to-dusco-dark px-6 pt-6 pb-10 text-white text-center">
+      <div className="hero-gradient px-6 pt-6 pb-10 text-white text-center">
         <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mx-auto text-2xl font-black">
           {user?.name?.charAt(0) || 'U'}
         </div>

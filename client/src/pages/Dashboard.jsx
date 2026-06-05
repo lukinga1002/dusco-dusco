@@ -54,24 +54,26 @@ export default function Dashboard() {
   return (
     <div className="flex-1 flex flex-col overflow-y-auto">
       {/* Hero */}
-      <div className="bg-gradient-to-br from-dusco to-dusco-dark px-6 pt-5 pb-8 text-white">
+      <div className="hero-gradient px-6 pt-5 pb-10 text-white relative overflow-hidden">
+        <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/5" />
+        <div className="absolute right-6 top-16 w-20 h-20 rounded-full bg-white/5" />
         <p className="text-sm text-white/70 mb-1">Habari, {user?.name?.split(' ')[0]} 👋</p>
-        <p className="text-xs text-white/50 mb-2">Total Balance</p>
-        <h2 className="text-3xl font-black tabular-nums">{formatTZS(walletData.totalBalance)}</h2>
+        <p className="text-[11px] text-white/45 mb-2 uppercase tracking-wider">Total Balance</p>
+        <h2 className="text-[2.1rem] leading-none font-black tabular-nums">{formatTZS(walletData.totalBalance)}</h2>
         <button onClick={copyDuscoNumber}
-          className="mt-3 inline-flex items-center gap-1.5 bg-white/15 backdrop-blur rounded-full px-3 py-1.5 text-xs font-medium">
+          className="mt-4 inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 backdrop-blur rounded-full px-3 py-1.5 text-xs font-medium transition">
           <span className="font-mono tracking-wide">{user?.duscoNumber}</span>
           <span>{copied ? '✓ Copied!' : '📋 Copy'}</span>
         </button>
       </div>
 
       {/* Quick actions */}
-      <div className="flex gap-3 px-5 -mt-4">
+      <div className="flex gap-3 px-5 -mt-5">
         <button onClick={() => setShowDeposit(true)}
-          className="flex-1 bg-white shadow-md rounded-xl py-3 text-center font-bold text-sm text-dusco border border-gray-100 hover:shadow-lg transition active:scale-[0.98]">
-          💰 Deposit
+          className="flex-1 bg-white shadow-premium rounded-2xl py-3.5 text-center font-bold text-sm text-dusco hover:-translate-y-0.5 transition active:scale-[0.98]">
+          💰 Add Money
         </button>
-        <button disabled className="flex-1 bg-white shadow-md rounded-xl py-3 text-center font-bold text-sm text-gray-300 border border-gray-100 cursor-not-allowed" title="Coming Soon">
+        <button disabled className="flex-1 bg-white shadow-card rounded-2xl py-3.5 text-center font-bold text-sm text-gray-300 cursor-not-allowed" title="Coming Soon">
           📤 Send
         </button>
       </div>
@@ -159,7 +161,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {showDeposit && <DepositModal onClose={() => setShowDeposit(false)} onSuccess={loadData} bahashas={walletData.bahashas} />}
+      {showDeposit && <DepositModal onClose={() => setShowDeposit(false)} onSuccess={loadData} bahashas={walletData.bahashas} duscoNumber={user?.duscoNumber} />}
       {showWithdraw && <WithdrawModal bahasha={showWithdraw} onClose={() => setShowWithdraw(null)} onSuccess={loadData} />}
     </div>
   );

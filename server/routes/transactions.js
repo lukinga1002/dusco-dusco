@@ -17,7 +17,7 @@ function calculateWithdrawalFee(amount, heldSince) {
 
 router.post('/deposit', async (req, res) => {
   try {
-    const { amount, sourceNetwork } = req.body;
+    const { amount, sourceNetwork, senderPhone, external } = req.body;
     if (!amount || amount <= 0) return res.status(400).json({ error: 'Amount must be positive' });
     if (!sourceNetwork) return res.status(400).json({ error: 'Source network is required' });
 
@@ -25,8 +25,8 @@ router.post('/deposit', async (req, res) => {
     const { data: bahashas } = await supabase.from('bahashas').select('*').eq('user_id', req.userId).order('created_at');
     if (!bahashas.length) return res.status(400).json({ error: 'No bahashas configured' });
 
-    // Process via payment service
-    const payment = await collectPayment({ amount, source_network: sourceNetwork, source_phone: '0700000000', dusco_number: user.dusco_number });
+    // Process via payment service (external = money sent to the Dusco number from another app)
+    const payment = await collectPayment({ amount, source_network: sourceNetwork, source_phone: senderPhone || '0700000000', dusco_number: user.dusco_number });
     const netAmount = payment.net_amount;
 
     const splits = bahashas.map(b => ({
@@ -54,12 +54,15 @@ router.post('/deposit', async (req, res) => {
     }
 
     const splitDesc = splits.map(s => `${s.bahashaName} TZS ${s.amount.toLocaleString()}`).join(' | ');
+    const sourceLabel = external
+      ? `received from ${senderPhone || 'an external account'} via ${sourceNetwork}`
+      : `deposited via ${sourceNetwork}`;
     await supabase.from('notifications').insert({
-      user_id: req.userId, title: 'Deposit received',
-      message: `TZS ${amount.toLocaleString()} deposited via ${sourceNetwork}. Split: ${splitDesc}`, type: 'deposit',
+      user_id: req.userId, title: external ? 'Money received' : 'Deposit received',
+      message: `TZS ${amount.toLocaleString()} ${sourceLabel}. Auto-split: ${splitDesc}`, type: 'deposit',
     });
 
-    res.json({ message: 'Deposit processed', grossAmount: amount, crossNetworkFee: payment.cross_network_fee, netAmount, sourceNetwork, transactionId: payment.transaction_id, splits });
+    res.json({ message: 'Deposit processed', grossAmount: amount, crossNetworkFee: payment.cross_network_fee, netAmount, sourceNetwork, senderPhone: senderPhone || null, external: !!external, transactionId: payment.transaction_id, splits });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

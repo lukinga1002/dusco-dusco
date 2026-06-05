@@ -2,13 +2,16 @@
 @import "tailwindcss";
 
 @theme {
-  --color-dusco: #F22122;
-  --color-dusco-dark: #D41E1F;
-  --color-dusco-light: #FEE2E2;
-  --color-dark: #1A1A1A;
-  --color-dark-soft: #2D2D2D;
-  --color-surface: #FAFAFA;
-  --color-success: #22C55E;
+  /* Selcom-Pesa inspired deep royal blue brand */
+  --color-dusco: #1B2F8F;
+  --color-dusco-dark: #122166;
+  --color-dusco-light: #E6EAF8;
+  --color-accent: #00B4E6;
+  --color-gold: #C9A227;
+  --color-dark: #14182B;
+  --color-dark-soft: #232842;
+  --color-surface: #F7F8FC;
+  --color-success: #16A34A;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
   --font-sans: 'DM Sans', sans-serif;
@@ -31,3 +34,13 @@ input:focus, select:focus, textarea:focus {
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 
 .tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* Premium touches */
+.shadow-premium { box-shadow: 0 4px 24px -6px rgba(27, 47, 143, 0.18), 0 2px 8px -4px rgba(20, 24, 43, 0.10); }
+.shadow-card { box-shadow: 0 1px 3px rgba(20, 24, 43, 0.06), 0 1px 2px rgba(20, 24, 43, 0.04); }
+.hero-gradient { background: linear-gradient(135deg, #1B2F8F 0%, #122166 60%, #0C1A4D 100%); }
+.gold-shimmer { background: linear-gradient(120deg, #C9A227 0%, #E6C757 50%, #C9A227 100%); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

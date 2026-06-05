@@ -99,7 +99,7 @@ export default function Landing() {
       </section>
 
       {/* CTA */}
-      <section className="px-6 py-20 text-center bg-dusco">
+      <section className="px-6 py-20 text-center hero-gradient relative overflow-hidden">
         <h2 className="text-3xl font-bold text-white mb-4">Start saving smarter today</h2>
         <p className="text-white/70 mb-8 max-w-md mx-auto">Join thousands of Tanzanians who use Dusco to automatically organize their money.</p>
         <Link to="/register" className="inline-block px-8 py-4 bg-white text-dusco font-bold text-lg rounded-xl hover:bg-gray-50 transition">

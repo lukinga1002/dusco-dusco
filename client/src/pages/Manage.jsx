@@ -218,7 +218,7 @@ export default function Manage() {
                     {b.goalAmount && (
                       <div className="mt-1.5">
                         <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (b.balance / b.goalAmount) * 100)}%`, backgroundColor: b.balance >= b.goalAmount ? '#22C55E' : (colors[i % colors.length].includes('dusco') ? '#F22122' : '#3B82F6') }} />
+                          <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (b.balance / b.goalAmount) * 100)}%`, backgroundColor: b.balance >= b.goalAmount ? '#22C55E' : (colors[i % colors.length].includes('dusco') ? '#1B2F8F' : '#3B82F6') }} />
                         </div>
                         <p className="text-[10px] text-gray-400 mt-0.5 tabular-nums">
                           {b.balance >= b.goalAmount ? '✓ Goal reached!' : `${formatTZS(b.balance)} / ${formatTZS(b.goalAmount)}`}

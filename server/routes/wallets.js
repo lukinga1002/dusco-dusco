@@ -5,7 +5,7 @@ const { authenticateToken } = require('../middleware/auth');
 const router = express.Router();
 router.use(authenticateToken);
 
-const BAHASHA_COLORS = ['#F22122', '#3B82F6', '#22C55E', '#F59E0B', '#8B5CF6', '#EC4899'];
+const BAHASHA_COLORS = ['#1B2F8F', '#00B4E6', '#16A34A', '#F59E0B', '#8B5CF6', '#EC4899'];
 
 router.get('/', async (req, res) => {
   try {
