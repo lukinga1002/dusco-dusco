@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [copied, setCopied] = useState(false);
   const [showSend, setShowSend] = useState(false);
   const [showValues, setShowValues] = useState(false);
+  const [balanceHidden, setBalanceHidden] = useState(true);
 
   const loadData = async () => {
     try {
@@ -64,8 +65,20 @@ export default function Dashboard() {
         <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/5" />
         <div className="absolute right-6 top-16 w-20 h-20 rounded-full bg-white/5" />
         <p className="text-sm text-white/70 mb-1">Habari, {user?.name?.split(' ')[0]} 👋</p>
-        <p className="text-[11px] text-white/45 mb-2 uppercase tracking-wider">Total Balance</p>
-        <h2 className="text-[2.1rem] leading-none font-black tabular-nums">{formatTZS(walletData.totalBalance)}</h2>
+        <button onClick={() => setBalanceHidden(h => !h)} className="flex items-center gap-1.5 mb-2">
+          <span className="text-[11px] text-white/45 uppercase tracking-wider">Total Balance</span>
+          {balanceHidden ? (
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+          ) : (
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+          )}
+        </button>
+        <h2 onClick={() => setBalanceHidden(h => !h)}
+          className="text-[2.1rem] leading-none font-black tabular-nums cursor-pointer select-none w-fit transition-all duration-300"
+          style={{ filter: balanceHidden ? 'blur(14px)' : 'none' }}>
+          {formatTZS(walletData.totalBalance)}
+        </h2>
+        {balanceHidden && <p className="text-[10px] text-white/40 mt-1">Tap to reveal balance</p>}
         <button onClick={copyDuscoNumber}
           className="mt-4 inline-flex items-center gap-1.5 bg-white/15 hover:bg-white/25 backdrop-blur rounded-full px-3 py-1.5 text-xs font-medium transition">
           <span className="font-mono tracking-wide">{user?.duscoNumber}</span>
