@@ -253,17 +253,6 @@ export default function Manage() {
                       </div>
                     )}
                     <p className="font-heading font-bold text-lg text-dark mt-1">{formatTZS(b.balance)}</p>
-                    {b.goalName && <p className="text-[10px] text-gray-500">{b.goalName}</p>}
-                    {b.goalAmount && (
-                      <div className="mt-1.5">
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (b.balance / b.goalAmount) * 100)}%`, backgroundColor: b.balance >= b.goalAmount ? '#22C55E' : (colors[i % colors.length].includes('dusco') ? '#ED1B24' : '#3B82F6') }} />
-                        </div>
-                        <p className="text-[10px] text-gray-500 mt-0.5 tabular-nums">
-                          {b.balance >= b.goalAmount ? '✓ Goal reached!' : `${formatTZS(b.balance)} / ${formatTZS(b.goalAmount)}`}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -287,8 +276,8 @@ export default function Manage() {
                     ✏️ Rename
                   </button>
                   <button onClick={() => { setGoalModal(b); setGoalName(b.goalName || ''); setGoalAmount(b.goalAmount ? String(b.goalAmount) : ''); }}
-                    className="flex-1 py-2 rounded-xl bg-gray-50 text-xs font-medium text-gray-600 hover:bg-gray-100 min-w-[70px]">
-                    🎯 Goal
+                    className={`flex-1 py-2 rounded-xl text-xs font-medium min-w-[70px] ${b.goalAmount ? 'bg-dusco-light text-dusco' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}>
+                    🎯 Goal{b.goalAmount ? ' ✓' : ''}
                   </button>
                   {!b.isLocked ? (
                     <button onClick={() => setLockModal(b)}
