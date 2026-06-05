@@ -32,8 +32,11 @@ router.post('/', async (req, res) => {
       const total = bahashas.reduce((s, b) => s + b.percentage, 0);
       if (Math.abs(total - 100) > 0.01) return res.status(400).json({ error: 'Bahasha percentages must sum to 100%' });
       for (let i = 0; i < bahashas.length; i++) {
+        const gb = bahashas[i];
+        const hasTarget = gb.goalName && gb.goalAmount && Number(gb.goalAmount) > 0;
         await supabase.from('group_bahashas').insert({
-          group_id: group.id, name: bahashas[i].name, percentage: bahashas[i].percentage, color: COLORS[i % COLORS.length],
+          group_id: group.id, name: gb.name, percentage: gb.percentage, color: COLORS[i % COLORS.length],
+          goal_name: hasTarget ? gb.goalName : null, goal_amount: hasTarget ? Number(gb.goalAmount) : null,
         });
       }
     }

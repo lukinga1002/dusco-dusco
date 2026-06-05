@@ -11,7 +11,7 @@ const PRESETS = [
 export default function GroupCreate() {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ name: '', description: '', frequency: 'weekly', sharesAmount: '', socialAmount: '' });
-  const [bahashas, setBahashas] = useState(PRESETS.map(p => ({ name: p.name, percentage: p.pct })));
+  const [bahashas, setBahashas] = useState(PRESETS.map(p => ({ name: p.name, percentage: p.pct, hasTarget: false, goalName: '', goalAmount: '' })));
   const [phones, setPhones] = useState([]);
   const [phoneInput, setPhoneInput] = useState('');
   const [error, setError] = useState('');
@@ -28,6 +28,8 @@ export default function GroupCreate() {
   };
 
   const handleCreate = async () => {
+    const badTarget = bahashas.find(b => b.hasTarget && (!b.goalName.trim() || !(Number(b.goalAmount) > 0)));
+    if (badTarget) return setError('Add a name and amount for each target, or switch the target off');
     setError('');
     setLoading(true);
     try {
@@ -36,7 +38,12 @@ export default function GroupCreate() {
         contributionFrequency: form.frequency,
         contributionSharesAmount: Number(form.sharesAmount) || 0,
         contributionSocialAmount: Number(form.socialAmount) || 0,
-        bahashas, invitePhones: phones,
+        bahashas: bahashas.map(b => ({
+          name: b.name, percentage: b.percentage,
+          ...(b.hasTarget && b.goalName.trim() && Number(b.goalAmount) > 0
+            ? { goalName: b.goalName.trim(), goalAmount: Number(b.goalAmount) } : {}),
+        })),
+        invitePhones: phones,
       });
       navigate(`/groups/${data.id}`);
     } catch (err) { setError(err.message); }
@@ -124,11 +131,31 @@ export default function GroupCreate() {
                     className="flex-1 accent-dusco" />
                   <span className="text-sm font-bold w-10 text-center">{b.percentage}%</span>
                 </div>
+
+                {/* Optional savings target */}
+                <div className="mt-2.5">
+                  <button type="button"
+                    onClick={() => setBahashas(prev => prev.map((x, j) => j === i ? { ...x, hasTarget: !x.hasTarget } : x))}
+                    className="flex items-center gap-2 text-xs font-medium text-gray-600">
+                    <span className={`w-9 h-5 rounded-full relative transition shrink-0 ${b.hasTarget ? 'bg-dusco' : 'bg-gray-300'}`}>
+                      <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${b.hasTarget ? 'left-[18px]' : 'left-0.5'}`} />
+                    </span>
+                    🎯 Set a group target <span className="text-gray-400">(optional)</span>
+                  </button>
+                  {b.hasTarget && (
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <input value={b.goalName} onChange={e => setBahashas(prev => prev.map((x, j) => j === i ? { ...x, goalName: e.target.value } : x))}
+                        placeholder="Target name" className="px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white" />
+                      <input type="number" value={b.goalAmount} onChange={e => setBahashas(prev => prev.map((x, j) => j === i ? { ...x, goalAmount: e.target.value } : x))}
+                        placeholder="Amount (TZS)" className="px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white" />
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
 
             {bahashas.length < 6 && (
-              <button onClick={() => setBahashas([...bahashas, { name: '', percentage: 0 }])}
+              <button onClick={() => setBahashas([...bahashas, { name: '', percentage: 0, hasTarget: false, goalName: '', goalAmount: '' }])}
                 className="w-full py-2.5 rounded-xl border-2 border-dashed border-gray-200 text-xs text-gray-500 hover:border-dusco hover:text-dusco transition">+ Add Bahasha</button>
             )}
 

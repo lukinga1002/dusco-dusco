@@ -90,7 +90,6 @@ export default function GroupDashboard() {
                           <h4 className="font-bold text-sm text-dark">{b.name}</h4>
                           <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">Group</span>
                         </div>
-                        {b.goalName && <p className="text-[10px] text-gray-500">{b.goalName}</p>}
                       </div>
                     </div>
                     <div className="text-right">
@@ -98,14 +97,23 @@ export default function GroupDashboard() {
                       <p className="text-[10px] text-gray-500">{b.percentage}%</p>
                     </div>
                   </div>
-                  {b.goalAmount && (
-                    <div className="mt-2">
-                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (b.balance / b.goalAmount) * 100)}%`, backgroundColor: b.balance >= b.goalAmount ? '#22C55E' : b.color }} />
+                  {b.goalAmount && (() => {
+                    const pct = Math.min(100, Math.round((b.balance / b.goalAmount) * 100));
+                    const reached = b.balance >= b.goalAmount;
+                    return (
+                      <div className="mt-2">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: reached ? '#16A34A' : b.color }} />
+                          </div>
+                          <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: reached ? '#16A34A' : b.color }}>{reached ? '✓' : `${pct}%`}</span>
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-0.5">
+                          {reached ? `Target reached — ${b.goalName} 🎉` : `to reach ${b.goalName}`} · {formatTZS(b.balance)} / {formatTZS(b.goalAmount)}
+                        </p>
                       </div>
-                      <p className="text-[10px] text-gray-500 mt-0.5">{formatTZS(b.balance)} / {formatTZS(b.goalAmount)}</p>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               ))}
             </div>
