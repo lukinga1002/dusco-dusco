@@ -13,8 +13,8 @@ const PRESETS = [
 
 export default function SetupBahashas() {
   const [bahashas, setBahashas] = useState([
-    { name: '', percentage: 50 },
-    { name: '', percentage: 50 },
+    { name: '', percentage: 50, hasTarget: false, goalName: '', goalAmount: '' },
+    { name: '', percentage: 50, hasTarget: false, goalName: '', goalAmount: '' },
   ]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,7 @@ export default function SetupBahashas() {
 
   const addBahasha = () => {
     if (bahashas.length >= 6) return;
-    setBahashas(prev => [...prev, { name: '', percentage: 0 }]);
+    setBahashas(prev => [...prev, { name: '', percentage: 0, hasTarget: false, goalName: '', goalAmount: '' }]);
   };
 
   const removeBahasha = (i) => {
@@ -47,11 +47,18 @@ export default function SetupBahashas() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isValid) return setError('All bahashas need names and percentages must total 100%');
+    const badTarget = bahashas.find(b => b.hasTarget && (!b.goalName.trim() || !(Number(b.goalAmount) > 0)));
+    if (badTarget) return setError('Add a name and amount for each target, or switch the target off');
     setError('');
     setLoading(true);
     try {
       for (const b of bahashas) {
-        await api.createWallet({ name: b.name, percentage: b.percentage });
+        const payload = { name: b.name, percentage: b.percentage };
+        if (b.hasTarget && b.goalName.trim() && Number(b.goalAmount) > 0) {
+          payload.goalName = b.goalName.trim();
+          payload.goalAmount = Number(b.goalAmount);
+        }
+        await api.createWallet(payload);
       }
       navigate('/dashboard');
     } catch (err) {
@@ -131,6 +138,25 @@ export default function SetupBahashas() {
                   ))}
                 </div>
               )}
+
+              {/* Optional savings target */}
+              <div className="mt-3 pl-7">
+                <button type="button" onClick={() => update(i, 'hasTarget', !b.hasTarget)}
+                  className="flex items-center gap-2 text-xs font-medium text-gray-600">
+                  <span className={`w-9 h-5 rounded-full relative transition shrink-0 ${b.hasTarget ? 'bg-dusco' : 'bg-gray-300'}`}>
+                    <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${b.hasTarget ? 'left-[18px]' : 'left-0.5'}`} />
+                  </span>
+                  🎯 Set a savings target <span className="text-gray-400">(optional)</span>
+                </button>
+                {b.hasTarget && (
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    <input value={b.goalName} onChange={e => update(i, 'goalName', e.target.value)}
+                      placeholder="Target name" className="px-3 py-2 rounded-xl border border-gray-200 text-sm bg-white" />
+                    <input type="number" value={b.goalAmount} onChange={e => update(i, 'goalAmount', e.target.value)}
+                      placeholder="Amount (TZS)" className="px-3 py-2 rounded-xl border border-gray-200 text-sm bg-white" />
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}

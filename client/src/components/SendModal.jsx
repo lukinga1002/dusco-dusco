@@ -15,7 +15,7 @@ function PickRow({ b, onSelect }) {
   const reached = hasGoal && b.balance >= b.goalAmount;
   const barPct = hasGoal ? goalPct : b.percentage;
   const barLabel = hasGoal ? (reached ? '✓' : `${goalPct}%`) : `${b.percentage}%`;
-  const caption = hasGoal ? b.goalName : 'of each deposit';
+  const caption = hasGoal ? (reached ? `Target reached — ${b.goalName} 🎉` : `to reach ${b.goalName}`) : 'of each deposit';
   const barColor = reached ? '#16A34A' : b.color;
   const faceBase = 'absolute inset-0 flex items-center gap-2.5 px-4 h-[84px]';
 

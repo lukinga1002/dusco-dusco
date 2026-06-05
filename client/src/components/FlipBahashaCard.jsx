@@ -24,7 +24,7 @@ export default function FlipBahashaCard({ bahasha: b, revealed, expanded, onTogg
   // Every bar shows a fill: goal bahashas → progress to target; others → their allocation share
   const barPct = hasGoal ? goalPct : b.percentage;
   const barLabel = hasGoal ? (reached ? '✓' : `${goalPct}%`) : `${b.percentage}%`;
-  const barCaption = hasGoal ? b.goalName : 'of each deposit';
+  const barCaption = hasGoal ? (reached ? `Target reached — ${b.goalName} 🎉` : `to reach ${b.goalName}`) : 'of each deposit';
   const barColor = reached ? '#16A34A' : b.color;
   const faceH = 'h-[88px]';
   const faceBase = `absolute inset-0 flex items-center gap-2.5 px-4 ${faceH}`;

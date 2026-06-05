@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { name, percentage } = req.body;
+    const { name, percentage, goalName, goalAmount } = req.body;
     if (!name || percentage === undefined) return res.status(400).json({ error: 'Name and percentage are required' });
 
     const { data: existing } = await supabase.from('bahashas').select('id, percentage').eq('user_id', req.userId);
@@ -33,12 +33,14 @@ router.post('/', async (req, res) => {
     if (currentTotal + percentage > 100.01) return res.status(400).json({ error: `Adding ${percentage}% would exceed 100%` });
 
     const color = BAHASHA_COLORS[existing.length % BAHASHA_COLORS.length];
+    // Target is optional — only stored if both a name and a positive amount are given
+    const hasTarget = goalName && goalAmount && Number(goalAmount) > 0;
     const { data, error } = await supabase.from('bahashas')
-      .insert({ user_id: req.userId, name, percentage, color })
+      .insert({ user_id: req.userId, name, percentage, color, goal_name: hasTarget ? goalName : null, goal_amount: hasTarget ? Number(goalAmount) : null })
       .select().single();
     if (error) throw error;
 
-    res.status(201).json({ id: data.id, name: data.name, percentage: data.percentage, balance: 0, color: data.color, isLocked: false, lockUntil: null });
+    res.status(201).json({ id: data.id, name: data.name, percentage: data.percentage, balance: 0, color: data.color, isLocked: false, lockUntil: null, goalName: data.goal_name, goalAmount: data.goal_amount });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
