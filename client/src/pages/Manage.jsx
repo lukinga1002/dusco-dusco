@@ -129,8 +129,8 @@ export default function Manage() {
     <div className="flex-1 flex flex-col overflow-y-auto">
       <div className="px-4 pt-4 pb-2 flex items-center justify-between">
         <div>
-          <h2 className="font-heading text-lg font-bold text-dark">Manage Envelopes</h2>
-          <p className="text-xs text-gray-500">{bahashas.length} envelope{bahashas.length !== 1 ? 's' : ''}</p>
+          <h2 className="font-heading text-lg font-bold text-dark">Manage Bahashas</h2>
+          <p className="text-xs text-gray-500">{bahashas.length} bahasha{bahashas.length !== 1 ? 's' : ''}</p>
         </div>
         {!rebalancing && (
           <button onClick={startRebalance} className="text-xs text-dusco font-semibold bg-dusco-light px-3 py-1.5 rounded-full">
@@ -273,7 +273,7 @@ export default function Manage() {
         {bahashas.length < 6 && !addMode && (
           <button onClick={() => setAddMode(true)}
             className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-sm text-gray-500 hover:border-dusco hover:text-dusco transition">
-            + Add Envelope ({bahashas.length}/6)
+            + Add Bahasha ({bahashas.length}/6)
           </button>
         )}
 

@@ -17,12 +17,13 @@ function PickRow({ b, onSelect }) {
   const barLabel = hasGoal ? (reached ? '✓' : `${goalPct}%`) : `${b.percentage}%`;
   const caption = hasGoal ? (reached ? `Target reached — ${b.goalName} 🎉` : `to reach ${b.goalName}`) : 'of each deposit';
   const barColor = reached ? '#16A34A' : b.color;
-  const faceBase = 'absolute inset-0 flex items-center gap-2.5 px-4 h-[84px]';
+  const faceH = hasGoal ? 'h-[84px]' : 'h-[68px]';
+  const faceBase = `absolute inset-0 flex items-center gap-2.5 px-4 ${faceH}`;
 
   return (
     <div className={`rounded-2xl border ${locked ? 'border-gray-100 opacity-50' : 'border-gray-200'}`} style={{ perspective: 1200 }}>
       <motion.div animate={{ rotateY: rev ? 180 : 0 }} transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-        style={{ transformStyle: 'preserve-3d' }} className="relative h-[84px]">
+        style={{ transformStyle: 'preserve-3d' }} className={`relative ${faceH}`}>
         {/* FRONT — closed */}
         <div className={faceBase} style={{ backfaceVisibility: 'hidden' }}>
           <div className="w-2 self-stretch my-3 rounded-full shrink-0" style={{ backgroundColor: b.color }} />
@@ -32,13 +33,19 @@ function PickRow({ b, onSelect }) {
               {locked && <span className="text-xs">🔒</span>}
               <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">{b.percentage}%</span>
             </div>
-            <div className="flex items-center gap-2 mt-1.5">
-              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div className="h-full rounded-full" style={{ width: `${barPct}%`, backgroundColor: barColor }} />
-              </div>
-              <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: barColor }}>{barLabel}</span>
-            </div>
-            <p className="text-[10px] text-gray-400 mt-1 truncate">{locked ? 'Locked' : caption}</p>
+            {hasGoal ? (
+              <>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${barPct}%`, backgroundColor: barColor }} />
+                  </div>
+                  <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: barColor }}>{barLabel}</span>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1 truncate">{locked ? 'Locked' : caption}</p>
+              </>
+            ) : (
+              <p className="text-[10px] text-gray-400 mt-1">{locked ? 'Locked' : 'Tap to choose'}</p>
+            )}
           </button>
           <button onClick={(e) => { e.stopPropagation(); setRev(true); }} aria-label={`Show ${b.name} balance`}
             className="shrink-0 flex items-center gap-1 rounded-lg px-2.5 py-1.5 active:scale-95 transition"

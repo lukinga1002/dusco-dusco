@@ -26,7 +26,8 @@ export default function FlipBahashaCard({ bahasha: b, revealed, expanded, onTogg
   const barLabel = hasGoal ? (reached ? '✓' : `${goalPct}%`) : `${b.percentage}%`;
   const barCaption = hasGoal ? (reached ? `Target reached — ${b.goalName} 🎉` : `to reach ${b.goalName}`) : 'of each deposit';
   const barColor = reached ? '#16A34A' : b.color;
-  const faceH = 'h-[88px]';
+  // No-target bahashas stay minimal (name + %); only goal bahashas get the bar
+  const faceH = hasGoal ? 'h-[88px]' : 'h-[60px]';
   const faceBase = `absolute inset-0 flex items-center gap-2.5 px-4 ${faceH}`;
 
   const Chevron = () => (
@@ -54,13 +55,17 @@ export default function FlipBahashaCard({ bahasha: b, revealed, expanded, onTogg
                 {b.isLocked && <span className="text-xs">🔒</span>}
                 <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">{b.percentage}%</span>
               </div>
-              <div className="flex items-center gap-2 mt-1.5">
-                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full transition-all" style={{ width: `${barPct}%`, backgroundColor: barColor }} />
-                </div>
-                <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: barColor }}>{barLabel}</span>
-              </div>
-              <p className="text-[10px] text-gray-400 mt-1 truncate">{barCaption}</p>
+              {hasGoal && (
+                <>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${barPct}%`, backgroundColor: barColor }} />
+                    </div>
+                    <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: barColor }}>{barLabel}</span>
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-1 truncate">{barCaption}</p>
+                </>
+              )}
             </button>
             {/* Tap THIS chip to flip just this bahasha */}
             <button onClick={flip} aria-label={`Show ${b.name} amount`}

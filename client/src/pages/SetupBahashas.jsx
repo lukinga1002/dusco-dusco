@@ -164,7 +164,7 @@ export default function SetupBahashas() {
         {bahashas.length < 6 && (
           <button type="button" onClick={addBahasha}
             className="w-full py-3 rounded-2xl border-2 border-dashed border-gray-200 text-sm text-gray-500 hover:border-dusco hover:text-dusco transition">
-            + Add Envelope ({bahashas.length}/6)
+            + Add Bahasha ({bahashas.length}/6)
           </button>
         )}
 
