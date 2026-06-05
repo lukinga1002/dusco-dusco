@@ -175,10 +175,13 @@ router.post('/:id/withdraw', async (req, res) => {
     if (amount > bahasha.balance) return res.status(400).json({ error: 'Insufficient balance' });
 
     const fee = Math.max(500, Math.min(Math.round(amount * 0.01), 5000));
-    await supabase.from('group_bahashas').update({ balance: bahasha.balance - amount - fee }).eq('id', bahashaId);
-    await supabase.from('group_transactions').insert({ group_id: gid, user_id: req.userId, group_bahasha_id: bahashaId, type: 'withdrawal', amount: -amount, fee, description: purpose || `Withdrawal from ${bahasha.name}`, reference: `GWD-${Date.now()}` });
+    if (fee >= amount) return res.status(400).json({ error: `Amount too small — it must be more than the TZS ${fee.toLocaleString()} fee.` });
+    // Fee-inclusive: `amount` leaves the bahasha; recipient receives amount - fee
+    const netSent = amount - fee;
+    await supabase.from('group_bahashas').update({ balance: bahasha.balance - amount }).eq('id', bahashaId);
+    await supabase.from('group_transactions').insert({ group_id: gid, user_id: req.userId, group_bahasha_id: bahashaId, type: 'withdrawal', amount: -amount, fee, description: (purpose || `Withdrawal from ${bahasha.name}`) + ` · sent TZS ${netSent.toLocaleString()}, fee TZS ${fee.toLocaleString()}`, reference: `GWD-${Date.now()}` });
 
-    res.json({ message: 'Withdrawal processed (auto-approved for demo)', amount, fee, bahashaName: bahasha.name, note: 'In production, this requires member approval' });
+    res.json({ message: 'Withdrawal processed (auto-approved for demo)', amount, netSent, fee, bahashaName: bahasha.name, note: 'In production, this requires member approval' });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

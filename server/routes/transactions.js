@@ -83,31 +83,35 @@ router.post('/withdraw', async (req, res) => {
     const withdrawalFee = calculateWithdrawalFee(amount, earliest?.[0]?.held_since);
     const feeWaived = withdrawalFee === 0 && earliest?.[0]?.held_since;
 
-    const payment = await disburseFunds({ amount, destination_network: destinationNetwork, destination_phone: destinationPhone, bahasha_id: bahashaId });
+    if (withdrawalFee >= amount) return res.status(400).json({ error: `Amount too small — it must be more than the TZS ${withdrawalFee.toLocaleString()} fee.` });
 
-    const totalDeducted = amount + withdrawalFee;
-    await supabase.from('bahashas').update({ balance: bahasha.balance - totalDeducted }).eq('id', bahashaId);
+    // Fee-inclusive: `amount` leaves the bahasha; the fee is taken out of it,
+    // and the recipient receives the remainder.
+    const netSent = amount - withdrawalFee;
+    const payment = await disburseFunds({ amount: netSent, destination_network: destinationNetwork, destination_phone: destinationPhone, bahasha_id: bahashaId });
+
+    await supabase.from('bahashas').update({ balance: bahasha.balance - amount }).eq('id', bahashaId);
 
     await supabase.from('transactions').insert({
       user_id: req.userId, bahasha_id: bahashaId, type: 'withdrawal', amount: -amount, fee: withdrawalFee,
       destination_phone: destinationPhone, destination_network: destinationNetwork, reference: payment.transaction_id,
-      description: `Withdrawal from ${bahasha.name}${feeWaived ? ' (fee waived - 90-day bonus)' : ''}`,
+      description: `Sent TZS ${netSent.toLocaleString()} from ${bahasha.name}${feeWaived ? ' (fee waived - 90-day bonus)' : ` · fee TZS ${withdrawalFee.toLocaleString()}`}`,
     });
 
     if (withdrawalFee > 0) {
       await supabase.from('transactions').insert({
         user_id: req.userId, bahasha_id: bahashaId, type: 'fee', amount: withdrawalFee,
-        description: 'Withdrawal fee', reference: `FEE-${payment.transaction_id}`,
+        description: 'Withdrawal fee (deducted from amount)', reference: `FEE-${payment.transaction_id}`,
       });
     }
 
     await supabase.from('notifications').insert({
       user_id: req.userId, title: 'Withdrawal completed',
-      message: `TZS ${amount.toLocaleString()} withdrawn from ${bahasha.name} to ${destinationPhone} (${destinationNetwork}). Fee: TZS ${withdrawalFee.toLocaleString()}${feeWaived ? ' (waived)' : ''}`,
+      message: `TZS ${netSent.toLocaleString()} sent from ${bahasha.name} to ${destinationPhone} (${destinationNetwork}). Fee: TZS ${withdrawalFee.toLocaleString()}${feeWaived ? ' (waived)' : ''} · TZS ${amount.toLocaleString()} taken from bahasha`,
       type: 'withdrawal',
     });
 
-    res.json({ message: 'Withdrawal processed', amount, withdrawalFee, feeWaived: !!feeWaived, destination: `${destinationPhone} (${destinationNetwork})`, bahashaName: bahasha.name, remainingBalance: bahasha.balance - totalDeducted, transactionId: payment.transaction_id });
+    res.json({ message: 'Withdrawal processed', amount, netSent, withdrawalFee, feeWaived: !!feeWaived, destination: `${destinationPhone} (${destinationNetwork})`, bahashaName: bahasha.name, remainingBalance: bahasha.balance - amount, transactionId: payment.transaction_id });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

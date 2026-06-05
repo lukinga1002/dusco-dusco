@@ -17,6 +17,7 @@ export default function WithdrawModal({ bahasha, onClose, onSuccess }) {
   const rawFee = Math.round(amt * 0.01);
   const fee = Math.max(500, Math.min(rawFee, 5000));
   const displayFee = amt > 0 ? fee : 0;
+  const netSent = Math.max(0, amt - displayFee);
 
   const handleWithdraw = async () => {
     if (!amt || amt <= 0) return setError('Enter a valid amount');
@@ -78,16 +79,16 @@ export default function WithdrawModal({ bahasha, onClose, onSuccess }) {
             {amt > 0 && (
               <div className="bg-gray-50 rounded-2xl p-4 mb-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Withdrawal</span>
+                  <span className="text-gray-500">Taken from {bahasha.name}</span>
                   <span className="font-medium">{formatTZS(amt)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Fee (1%, floor 500, cap 5,000)</span>
-                  <span className="text-error font-medium">{formatTZS(displayFee)}</span>
+                  <span className="text-error font-medium">−{formatTZS(displayFee)}</span>
                 </div>
                 <div className="flex justify-between text-sm font-bold border-t border-gray-200 pt-2">
-                  <span>Total deducted</span>
-                  <span>{formatTZS(amt + displayFee)}</span>
+                  <span>You receive</span>
+                  <span className="text-success">{formatTZS(netSent)}</span>
                 </div>
               </div>
             )}
@@ -105,7 +106,7 @@ export default function WithdrawModal({ bahasha, onClose, onSuccess }) {
               <span className="text-4xl">{result.feeWaived ? '🎉' : '✅'}</span>
             </motion.div>
             <h2 className="font-heading text-xl font-bold text-dark mt-3">Withdrawal Sent</h2>
-            <p className="text-sm text-gray-500 mt-1">{formatTZS(result.amount)} to {result.destination}</p>
+            <p className="text-sm text-gray-500 mt-1">{formatTZS(result.netSent ?? result.amount)} to {result.destination}</p>
             {result.feeWaived && (
               <div className="bg-success/10 text-success text-xs font-medium rounded-full px-3 py-1 inline-block mt-2">
                 Fee waived — 90-day savings bonus!

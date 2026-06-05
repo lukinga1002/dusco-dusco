@@ -20,6 +20,7 @@ export default function SendModal({ onClose, onSuccess, bahashas }) {
 
   const amt = Number(amount);
   const fee = amt > 0 ? Math.max(500, Math.min(Math.round(amt * 0.01), 5000)) : 0;
+  const netSent = Math.max(0, amt - fee);
   const isMobile = destType === 'mobile';
   const destNetwork = isMobile ? network : bank;
   const destLabel = isMobile ? 'phone number' : 'account number';
@@ -131,7 +132,7 @@ export default function SendModal({ onClose, onSuccess, bahashas }) {
               </div>
             </div>
 
-            <label className="block text-xs font-semibold text-gray-500 mb-1.5">Amount (TZS)</label>
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5">Amount to take from {bahasha.name} (TZS)</label>
             <input type="number" value={amount} onChange={e => setAmount(e.target.value)} max={bahasha.balance}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-xl font-black bg-surface" />
             <button onClick={() => setAmount(String(bahasha.balance))}
@@ -141,16 +142,16 @@ export default function SendModal({ onClose, onSuccess, bahashas }) {
 
             {amt > 0 && (
               <div className="bg-surface rounded-xl p-4 mb-4 text-sm space-y-2">
-                <div className="flex justify-between"><span className="text-gray-500">Amount</span><span className="font-bold">{formatTZS(amt)}</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Fee (1%, max 5,000)</span><span className="text-error font-bold">{formatTZS(fee)}</span></div>
-                <div className="flex justify-between font-black border-t border-gray-200 pt-2"><span>Total deducted</span><span>{formatTZS(amt + fee)}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Taken from {bahasha.name}</span><span className="font-bold">{formatTZS(amt)}</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Fee (1%, max 5,000)</span><span className="text-error font-bold">−{formatTZS(fee)}</span></div>
+                <div className="flex justify-between font-black border-t border-gray-200 pt-2"><span>Recipient receives</span><span className="text-success">{formatTZS(netSent)}</span></div>
               </div>
             )}
 
             {error && <p className="text-error text-xs text-center mb-3">{error}</p>}
             <button onClick={handleSend} disabled={loading}
               className="w-full py-3.5 bg-dusco text-white font-bold rounded-xl hover:bg-dusco-dark transition disabled:opacity-40 active:scale-[0.98]">
-              Send {amt > 0 ? formatTZS(amt) : 'money'}
+              Send {netSent > 0 ? formatTZS(netSent) : 'money'}
             </button>
           </div>
         )}
@@ -159,7 +160,7 @@ export default function SendModal({ onClose, onSuccess, bahashas }) {
         {step === 'processing' && (
           <div className="p-6 py-20 text-center">
             <div className="w-12 h-12 border-4 border-dusco border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="mt-4 text-sm text-gray-500 font-medium">Sending {formatTZS(amt)} to {account}…</p>
+            <p className="mt-4 text-sm text-gray-500 font-medium">Sending {formatTZS(netSent)} to {account}…</p>
             <p className="mt-1 text-xs text-gray-400">{destNetwork}</p>
           </div>
         )}
@@ -169,10 +170,10 @@ export default function SendModal({ onClose, onSuccess, bahashas }) {
           <div className="p-6 text-center">
             <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: 'spring' }} className="text-4xl inline-block">✅</motion.span>
             <h2 className="text-xl font-black text-dark mt-3">Money sent</h2>
-            <p className="text-sm text-gray-500 mt-1">{formatTZS(result.amount)} to {account} · {destNetwork}</p>
+            <p className="text-sm text-gray-500 mt-1">{formatTZS(result.netSent ?? result.amount)} to {account} · {destNetwork}</p>
             {result.feeWaived
               ? <div className="inline-block mt-2 bg-success/10 text-success text-xs font-bold rounded-full px-3 py-1">Fee waived — 90-day bonus!</div>
-              : <p className="text-xs text-gray-400 mt-1">Fee: {formatTZS(result.withdrawalFee)}</p>}
+              : <p className="text-xs text-gray-400 mt-1">TZS {(result.amount).toLocaleString()} taken · fee {formatTZS(result.withdrawalFee)}</p>}
             <p className="text-xs text-gray-500 mt-3">Remaining in {result.bahashaName}: {formatTZS(result.remainingBalance)}</p>
             <button onClick={() => { onSuccess(); onClose(); }}
               className="w-full py-3.5 bg-dusco text-white font-bold rounded-xl mt-6 hover:bg-dusco-dark transition">Done</button>
