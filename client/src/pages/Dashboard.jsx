@@ -75,16 +75,16 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Quick actions */}
-      <div className="flex gap-3 px-5 -mt-5">
+      {/* Quick actions — matched pair */}
+      <div className="grid grid-cols-2 gap-3 px-5 -mt-6">
         <button onClick={() => setShowDeposit(true)}
-          className="flex-1 bg-white shadow-premium rounded-2xl py-3.5 text-center font-bold text-sm text-dusco hover:-translate-y-0.5 transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-dusco focus-visible:ring-offset-2">
-          💰 Add Money
+          className="h-14 bg-white shadow-premium rounded-2xl flex items-center justify-center gap-1.5 font-bold text-sm text-dusco transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-dusco focus-visible:ring-offset-2">
+          <span className="text-base leading-none">💰</span> Add Money
         </button>
         <button onClick={showSendSoon}
-          className="relative flex-1 bg-white shadow-card rounded-2xl py-3.5 text-center font-bold text-sm text-gray-400 transition active:scale-[0.98]">
-          📤 Send
-          <span className="absolute top-1.5 right-2 text-[8px] font-black uppercase tracking-wide bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">Soon</span>
+          className="relative h-14 bg-white shadow-premium rounded-2xl flex items-center justify-center gap-1.5 font-bold text-sm text-gray-400 transition active:scale-[0.98]">
+          <span className="text-base leading-none">📤</span> Send
+          <span className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-wide bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">Soon</span>
         </button>
       </div>
 
