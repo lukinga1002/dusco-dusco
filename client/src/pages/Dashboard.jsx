@@ -5,6 +5,7 @@ import { api } from '../utils/api';
 import { formatTZS, formatDateTime } from '../utils/format';
 import DepositModal from '../components/DepositModal';
 import WithdrawModal from '../components/WithdrawModal';
+import FlipBahashaCard from '../components/FlipBahashaCard';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const [cardTxns, setCardTxns] = useState({});
   const [copied, setCopied] = useState(false);
   const [sendToast, setSendToast] = useState(false);
+  const [showValues, setShowValues] = useState(false);
 
   const showSendSoon = () => {
     setSendToast(true);
@@ -98,63 +100,31 @@ export default function Dashboard() {
 
       {/* Bahasha cards */}
       <div className="px-5 mt-6">
-        <h3 className="font-bold text-sm text-gray-500 mb-3">Your Bahashas</h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-bold text-sm text-gray-500">Your Bahashas</h3>
+          <button onClick={() => setShowValues(v => !v)}
+            className="flex items-center gap-1.5 text-xs font-bold text-dusco bg-dusco-light px-3 py-1.5 rounded-full transition active:scale-95">
+            {showValues ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+            )}
+            {showValues ? 'Hide values' : 'Show values'}
+          </button>
+        </div>
         <div className="space-y-3">
-          {walletData.bahashas.map(b => {
-            const isExpanded = expandedCard === b.id;
-            return (
-              <motion.div key={b.id} layout className="bg-surface rounded-2xl border border-gray-100 overflow-hidden">
-                <button onClick={() => toggleCard(b.id)}
-                  className="w-full p-4 text-left flex items-center gap-3">
-                  <div className="w-2 h-10 rounded-full shrink-0" style={{ backgroundColor: b.color }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-dark text-sm">{b.name}</h4>
-                      {b.isLocked && <span className="text-xs">🔒</span>}
-                      <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">{b.percentage}%</span>
-                    </div>
-                    <p className="font-black text-dark tabular-nums mt-0.5">{formatTZS(b.balance)}</p>
-                    {b.goalName && <p className="text-[10px] text-gray-500 mt-0.5">{b.goalName}</p>}
-                    {b.goalAmount && (
-                      <div className="mt-1.5">
-                        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (b.balance / b.goalAmount) * 100)}%`, backgroundColor: b.balance >= b.goalAmount ? '#22C55E' : b.color }} />
-                        </div>
-                        <p className="text-[10px] text-gray-500 mt-0.5 tabular-nums">
-                          {b.balance >= b.goalAmount ? '✓ Goal reached!' : `${formatTZS(b.balance)} / ${formatTZS(b.goalAmount)}`}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <svg className={`w-4 h-4 text-gray-300 transition ${isExpanded ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9l6 6 6-6"/></svg>
-                </button>
-
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }}>
-                      <div className="px-4 pb-4 border-t border-gray-100 pt-3">
-                        <button onClick={() => setShowWithdraw(b)}
-                          className="w-full py-2.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-dark hover:bg-gray-50 transition mb-3">
-                          💸 Withdraw from {b.name}
-                        </button>
-                        {cardTxns[b.id] ? (
-                          cardTxns[b.id].length > 0 ? cardTxns[b.id].map(t => (
-                            <div key={t.id} className="flex items-center gap-2 py-1.5 text-xs">
-                              <span>{txnIcon[t.type] || '📝'}</span>
-                              <span className="flex-1 truncate text-gray-500">{t.description}</span>
-                              <span className={`tabular-nums font-bold ${t.amount >= 0 ? 'text-success' : 'text-error'}`}>
-                                {t.amount >= 0 ? '+' : ''}{formatTZS(t.amount)}
-                              </span>
-                            </div>
-                          )) : <p className="text-xs text-gray-300 text-center py-2">No transactions yet</p>
-                        ) : <p className="text-xs text-gray-300 text-center py-2">Loading...</p>}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
+          {walletData.bahashas.map(b => (
+            <FlipBahashaCard
+              key={b.id}
+              bahasha={b}
+              revealed={showValues}
+              expanded={expandedCard === b.id}
+              onToggleExpand={() => toggleCard(b.id)}
+              onWithdraw={setShowWithdraw}
+              txns={cardTxns[b.id]}
+              txnIcon={txnIcon}
+            />
+          ))}
         </div>
       </div>
 
