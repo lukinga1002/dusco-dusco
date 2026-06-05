@@ -21,8 +21,11 @@ export default function Manage() {
   const [goalModal, setGoalModal] = useState(null);
   const [goalName, setGoalName] = useState('');
   const [goalAmount, setGoalAmount] = useState('');
+  const [revealedAmt, setRevealedAmt] = useState({});
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
+
+  const toggleReveal = (id) => setRevealedAmt(prev => ({ ...prev, [id]: !prev[id] }));
 
   const load = async () => {
     try {
@@ -252,7 +255,28 @@ export default function Manage() {
                         <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{b.percentage}%</span>
                       </div>
                     )}
-                    <p className="font-heading font-bold text-lg text-dark mt-1">{formatTZS(b.balance)}</p>
+                    {/* Hidden amount — tap to flip & reveal */}
+                    <div className="mt-1.5" style={{ perspective: 800 }}>
+                      <motion.button type="button" onClick={() => toggleReveal(b.id)}
+                        animate={{ rotateY: revealedAmt[b.id] ? 180 : 0 }}
+                        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                        style={{ transformStyle: 'preserve-3d' }}
+                        className="relative h-8 w-48 text-left"
+                        aria-label={revealedAmt[b.id] ? `Hide ${b.name} amount` : `Show ${b.name} amount`}>
+                        {/* FRONT — hidden */}
+                        <span className="absolute inset-0 flex items-center" style={{ backfaceVisibility: 'hidden' }}>
+                          <span className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5" style={{ background: `linear-gradient(135deg, ${b.color}22, ${b.color}11)` }}>
+                            <span className="font-black tracking-widest text-sm" style={{ color: b.color }}>••••••</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={b.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+                          </span>
+                        </span>
+                        {/* BACK — amount */}
+                        <span className="absolute inset-0 flex items-center gap-2" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                          <span className="font-heading font-bold text-lg text-dark tabular-nums">{formatTZS(b.balance)}</span>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={b.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                        </span>
+                      </motion.button>
+                    </div>
                   </div>
                 </div>
 
