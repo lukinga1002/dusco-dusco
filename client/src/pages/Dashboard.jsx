@@ -5,6 +5,7 @@ import { api } from '../utils/api';
 import { formatTZS, formatDateTime } from '../utils/format';
 import DepositModal from '../components/DepositModal';
 import WithdrawModal from '../components/WithdrawModal';
+import SendModal from '../components/SendModal';
 import FlipBahashaCard from '../components/FlipBahashaCard';
 
 export default function Dashboard() {
@@ -16,13 +17,8 @@ export default function Dashboard() {
   const [expandedCard, setExpandedCard] = useState(null);
   const [cardTxns, setCardTxns] = useState({});
   const [copied, setCopied] = useState(false);
-  const [sendToast, setSendToast] = useState(false);
+  const [showSend, setShowSend] = useState(false);
   const [showValues, setShowValues] = useState(false);
-
-  const showSendSoon = () => {
-    setSendToast(true);
-    setTimeout(() => setSendToast(false), 2800);
-  };
 
   const loadData = async () => {
     try {
@@ -62,7 +58,7 @@ export default function Dashboard() {
   return (
     <div className="flex-1 flex flex-col overflow-y-auto">
       {/* Hero */}
-      <div className="hero-gradient px-6 pt-5 pb-10 text-white relative overflow-hidden">
+      <div className="hero-gradient px-6 pt-5 pb-6 text-white relative overflow-hidden">
         <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/5" />
         <div className="absolute right-6 top-16 w-20 h-20 rounded-full bg-white/5" />
         <p className="text-sm text-white/70 mb-1">Habari, {user?.name?.split(' ')[0]} 👋</p>
@@ -75,28 +71,17 @@ export default function Dashboard() {
         </button>
       </div>
 
-      {/* Quick actions — matched pair */}
-      <div className="grid grid-cols-2 gap-3 px-5 -mt-6">
+      {/* Quick actions — matched pair, crisp on white */}
+      <div className="grid grid-cols-2 gap-3 px-5 mt-4">
         <button onClick={() => setShowDeposit(true)}
-          className="h-14 bg-white shadow-premium rounded-2xl flex items-center justify-center gap-1.5 font-bold text-sm text-dusco transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-dusco focus-visible:ring-offset-2">
+          className="h-14 bg-dusco text-white shadow-premium rounded-2xl flex items-center justify-center gap-1.5 font-bold text-sm transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-dusco focus-visible:ring-offset-2">
           <span className="text-base leading-none">💰</span> Add Money
         </button>
-        <button onClick={showSendSoon}
-          className="relative h-14 bg-white shadow-premium rounded-2xl flex items-center justify-center gap-1.5 font-bold text-sm text-gray-400 transition active:scale-[0.98]">
+        <button onClick={() => setShowSend(true)}
+          className="h-14 bg-white text-dark border border-gray-200 shadow-card rounded-2xl flex items-center justify-center gap-1.5 font-bold text-sm transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-dusco focus-visible:ring-offset-2">
           <span className="text-base leading-none">📤</span> Send
-          <span className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-wide bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">Soon</span>
         </button>
       </div>
-
-      {/* Send-soon toast */}
-      <AnimatePresence>
-        {sendToast && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="mx-5 mt-3 bg-dark text-white text-xs rounded-xl px-4 py-2.5 text-center">
-            Send is coming soon — you'll be able to pay anyone straight from a bahasha.
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Bahasha cards */}
       <div className="px-5 mt-6">
@@ -151,6 +136,7 @@ export default function Dashboard() {
 
       {showDeposit && <DepositModal onClose={() => setShowDeposit(false)} onSuccess={loadData} bahashas={walletData.bahashas} duscoNumber={user?.duscoNumber} />}
       {showWithdraw && <WithdrawModal bahasha={showWithdraw} onClose={() => setShowWithdraw(null)} onSuccess={loadData} />}
+      {showSend && <SendModal bahashas={walletData.bahashas} onClose={() => setShowSend(false)} onSuccess={loadData} />}
     </div>
   );
 }
