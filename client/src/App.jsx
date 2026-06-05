@@ -43,6 +43,7 @@ function AppRoutes() {
     <Routes>
       {/* Public */}
       <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Landing />} />
+      <Route path="/welcome" element={<Landing />} />
       <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
       <Route path="/register" element={user ? <Navigate to="/dashboard" /> : <Register />} />
       <Route path="/verify-otp" element={<VerifyOtp />} />

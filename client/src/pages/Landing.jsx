@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const steps = [
   { icon: '📱', title: 'Get your Dusco number', desc: 'Register with your phone number and receive a unique DUS-XXXXXX code' },
@@ -23,6 +24,7 @@ const fees = [
 ];
 
 export default function Landing() {
+  const { user } = useAuth();
   // Pre-warm the backend so login is instant when the user signs in
   useEffect(() => { fetch('/api/health').catch(() => {}); }, []);
 
@@ -32,8 +34,14 @@ export default function Landing() {
       <nav className="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto">
         <span className="text-2xl font-black text-dusco">dusco</span>
         <div className="flex gap-3">
-          <Link to="/login" className="px-4 py-2 text-sm font-semibold text-dark-soft hover:text-dusco transition">Sign In</Link>
-          <Link to="/register" className="px-5 py-2 text-sm font-semibold bg-dusco text-white rounded-lg hover:bg-dusco-dark transition">Join Free</Link>
+          {user ? (
+            <Link to="/dashboard" className="px-5 py-2 text-sm font-semibold bg-dusco text-white rounded-lg hover:bg-dusco-dark transition">Go to Dashboard →</Link>
+          ) : (
+            <>
+              <Link to="/login" className="px-4 py-2 text-sm font-semibold text-dark-soft hover:text-dusco transition">Sign In</Link>
+              <Link to="/register" className="px-5 py-2 text-sm font-semibold bg-dusco text-white rounded-lg hover:bg-dusco-dark transition">Join Free</Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -45,8 +53,8 @@ export default function Landing() {
         <p className="mt-6 text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">
           Dusco splits every deposit into savings envelopes automatically. Save smarter without thinking about it.
         </p>
-        <Link to="/register" className="inline-block mt-8 px-8 py-4 bg-dusco text-white font-bold text-lg rounded-xl hover:bg-dusco-dark transition shadow-lg shadow-dusco/20">
-          Join Dusco — It's Free
+        <Link to={user ? '/dashboard' : '/register'} className="inline-block mt-8 px-8 py-4 bg-dusco text-white font-bold text-lg rounded-xl hover:bg-dusco-dark transition shadow-lg shadow-dusco/20">
+          {user ? 'Go to Dashboard →' : "Join Dusco — It's Free"}
         </Link>
         <p className="mt-4 text-xs text-gray-500">No app download needed. Works on any phone browser.</p>
       </section>
