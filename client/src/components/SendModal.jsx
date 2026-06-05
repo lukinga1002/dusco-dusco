@@ -17,7 +17,7 @@ function PickRow({ b, onSelect }) {
   const barLabel = hasGoal ? (reached ? '✓' : `${goalPct}%`) : `${b.percentage}%`;
   const caption = hasGoal ? (reached ? `Target reached — ${b.goalName} 🎉` : `to reach ${b.goalName}`) : 'of each deposit';
   const barColor = reached ? '#16A34A' : b.color;
-  const faceH = 'h-[84px]';
+  const faceH = 'h-[72px]';
   const faceBase = `absolute inset-0 flex items-center gap-2.5 px-4 ${faceH}`;
 
   return (
@@ -53,19 +53,7 @@ function PickRow({ b, onSelect }) {
               {locked && <span className="text-xs">🔒</span>}
             </div>
             <p className="font-black text-dark tabular-nums mt-0.5">{formatTZS(b.balance)}</p>
-            {hasGoal ? (
-              <div className="mt-1.5">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${barPct}%`, backgroundColor: barColor }} />
-                  </div>
-                  <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: barColor }}>{barLabel}</span>
-                </div>
-                <p className="text-[10px] text-gray-400 mt-0.5 truncate">{caption}</p>
-              </div>
-            ) : (
-              <p className="text-[10px] text-gray-400 mt-0.5">{locked ? 'Locked' : 'Tap to send from here'}</p>
-            )}
+            <p className="text-[10px] text-gray-400 mt-0.5">{locked ? 'Locked' : 'Tap to send from here'}</p>
           </button>
           <button onClick={(e) => { e.stopPropagation(); setRev(false); }} aria-label={`Hide ${b.name} balance`}
             className="shrink-0 p-1.5 rounded-lg active:scale-95 transition" style={{ background: `${b.color}14` }}>
