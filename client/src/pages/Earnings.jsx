@@ -105,14 +105,14 @@ export default function Earnings() {
               <div key={b.id}>
                 <div className="flex justify-between items-center text-xs mb-1">
                   <span className="text-gray-600 font-medium flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color || '#1B2F8F' }} />
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color || '#ED1B24' }} />
                     {b.name}
                   </span>
                   <span className="text-success font-semibold">+{formatTZS(b.projectedDividend)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${b.shareOfTotal}%`, backgroundColor: b.color || '#1B2F8F' }} />
+                    <div className="h-full rounded-full" style={{ width: `${b.shareOfTotal}%`, backgroundColor: b.color || '#ED1B24' }} />
                   </div>
                   <span className="text-[10px] text-gray-500 w-8">{b.shareOfTotal}%</span>
                 </div>

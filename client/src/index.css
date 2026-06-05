@@ -2,15 +2,14 @@
 @import "tailwindcss";
 
 @theme {
-  /* Selcom-Pesa inspired deep royal blue brand */
-  --color-dusco: #1B2F8F;
-  --color-dusco-dark: #122166;
-  --color-dusco-light: #E6EAF8;
-  --color-accent: #00B4E6;
-  --color-gold: #C9A227;
-  --color-dark: #14182B;
-  --color-dark-soft: #232842;
-  --color-surface: #F7F8FC;
+  /* Selcom-Pesa brand red */
+  --color-dusco: #ED1B24;
+  --color-dusco-dark: #C3121A;
+  --color-dusco-light: #FDE5E6;
+  --color-accent: #ED1B24;
+  --color-dark: #161616;
+  --color-dark-soft: #2A2A2A;
+  --color-surface: #FAFAFA;
   --color-success: #16A34A;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
@@ -32,7 +31,7 @@ input:focus, select:focus, textarea:focus {
 
 /* Visible keyboard focus on all interactive elements */
 button:focus-visible, a:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-dark);
   outline-offset: 2px;
   border-radius: 8px;
 }
@@ -43,10 +42,9 @@ button:focus-visible, a:focus-visible {
 .tabular-nums { font-variant-numeric: tabular-nums; }
 
 /* Premium touches */
-.shadow-premium { box-shadow: 0 4px 24px -6px rgba(27, 47, 143, 0.18), 0 2px 8px -4px rgba(20, 24, 43, 0.10); }
-.shadow-card { box-shadow: 0 1px 3px rgba(20, 24, 43, 0.06), 0 1px 2px rgba(20, 24, 43, 0.04); }
-.hero-gradient { background: linear-gradient(135deg, #1B2F8F 0%, #122166 60%, #0C1A4D 100%); }
-.gold-shimmer { background: linear-gradient(120deg, #C9A227 0%, #E6C757 50%, #C9A227 100%); }
+.shadow-premium { box-shadow: 0 4px 24px -6px rgba(237, 27, 36, 0.22), 0 2px 8px -4px rgba(22, 22, 22, 0.10); }
+.shadow-card { box-shadow: 0 1px 3px rgba(22, 22, 22, 0.06), 0 1px 2px rgba(22, 22, 22, 0.04); }
+.hero-gradient { background: linear-gradient(135deg, #ED1B24 0%, #C3121A 60%, #9E0E15 100%); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }

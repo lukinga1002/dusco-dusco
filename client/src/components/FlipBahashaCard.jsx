@@ -21,7 +21,12 @@ export default function FlipBahashaCard({ bahasha: b, revealed, expanded, onTogg
   const hasGoal = !!b.goalAmount;
   const goalPct = hasGoal ? Math.min(100, Math.round((b.balance / b.goalAmount) * 100)) : null;
   const reached = hasGoal && b.balance >= b.goalAmount;
-  const faceH = hasGoal ? 'h-[92px]' : 'h-[64px]';
+  // Every bar shows a fill: goal bahashas → progress to target; others → their allocation share
+  const barPct = hasGoal ? goalPct : b.percentage;
+  const barLabel = hasGoal ? (reached ? '✓' : `${goalPct}%`) : `${b.percentage}%`;
+  const barCaption = hasGoal ? b.goalName : 'of each deposit';
+  const barColor = reached ? '#16A34A' : b.color;
+  const faceH = 'h-[88px]';
   const faceBase = `absolute inset-0 flex items-center gap-2.5 px-4 ${faceH}`;
 
   const Chevron = () => (
@@ -49,21 +54,13 @@ export default function FlipBahashaCard({ bahasha: b, revealed, expanded, onTogg
                 {b.isLocked && <span className="text-xs">🔒</span>}
                 <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">{b.percentage}%</span>
               </div>
-              {hasGoal ? (
-                <div className="mt-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-bold" style={{ color: reached ? '#16A34A' : b.color }}>
-                      {reached ? '✓ Target reached' : `${goalPct}% of target`}
-                    </span>
-                    <span className="text-[10px] text-gray-400 truncate ml-2">{b.goalName}</span>
-                  </div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full transition-all" style={{ width: `${goalPct}%`, backgroundColor: reached ? '#16A34A' : b.color }} />
-                  </div>
+              <div className="flex items-center gap-2 mt-1.5">
+                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full transition-all" style={{ width: `${barPct}%`, backgroundColor: barColor }} />
                 </div>
-              ) : (
-                <p className="text-[11px] text-gray-400 mt-0.5">Amount hidden · tap 👁 to reveal</p>
-              )}
+                <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: barColor }}>{barLabel}</span>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-1 truncate">{barCaption}</p>
             </button>
             {/* Tap THIS chip to flip just this bahasha */}
             <button onClick={flip} aria-label={`Show ${b.name} amount`}

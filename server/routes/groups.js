@@ -7,7 +7,7 @@ const { SETTLEMENT_NETWORK } = require('../services/payment.types');
 const router = express.Router();
 router.use(authenticateToken);
 
-const COLORS = ['#1B2F8F', '#00B4E6', '#16A34A', '#F59E0B', '#8B5CF6', '#EC4899'];
+const COLORS = ['#ED1B24', '#3B82F6', '#16A34A', '#F59E0B', '#8B5CF6', '#EC4899'];
 
 // POST /api/groups — Create group
 router.post('/', async (req, res) => {
