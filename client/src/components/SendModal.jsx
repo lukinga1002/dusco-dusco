@@ -6,6 +6,73 @@ import { formatTZS } from '../utils/format';
 const MOBILE_NETWORKS = ['M-Pesa', 'Tigo Pesa', 'Airtel', 'Halotel'];
 const BANKS = ['CRDB', 'NMB', 'NBC', 'Equity', 'Exim', 'Stanbic'];
 
+/** Closed bahasha row for the picker — amount hidden until you flip the chip. */
+function PickRow({ b, onSelect }) {
+  const [rev, setRev] = useState(false);
+  const locked = b.isLocked && b.lockUntil && new Date(b.lockUntil) > new Date();
+  const hasGoal = !!b.goalAmount;
+  const goalPct = hasGoal ? Math.min(100, Math.round((b.balance / b.goalAmount) * 100)) : null;
+  const reached = hasGoal && b.balance >= b.goalAmount;
+  const barPct = hasGoal ? goalPct : b.percentage;
+  const barLabel = hasGoal ? (reached ? '✓' : `${goalPct}%`) : `${b.percentage}%`;
+  const caption = hasGoal ? b.goalName : 'of each deposit';
+  const barColor = reached ? '#16A34A' : b.color;
+  const faceBase = 'absolute inset-0 flex items-center gap-2.5 px-4 h-[84px]';
+
+  return (
+    <div className={`rounded-2xl border ${locked ? 'border-gray-100 opacity-50' : 'border-gray-200'}`} style={{ perspective: 1200 }}>
+      <motion.div animate={{ rotateY: rev ? 180 : 0 }} transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+        style={{ transformStyle: 'preserve-3d' }} className="relative h-[84px]">
+        {/* FRONT — closed */}
+        <div className={faceBase} style={{ backfaceVisibility: 'hidden' }}>
+          <div className="w-2 self-stretch my-3 rounded-full shrink-0" style={{ backgroundColor: b.color }} />
+          <button onClick={() => !locked && onSelect(b)} disabled={locked} className="flex-1 min-w-0 text-left disabled:cursor-not-allowed">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-dark text-sm truncate">{b.name}</span>
+              {locked && <span className="text-xs">🔒</span>}
+              <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">{b.percentage}%</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1.5">
+              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-full rounded-full" style={{ width: `${barPct}%`, backgroundColor: barColor }} />
+              </div>
+              <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: barColor }}>{barLabel}</span>
+            </div>
+            <p className="text-[10px] text-gray-400 mt-1 truncate">{locked ? 'Locked' : caption}</p>
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); setRev(true); }} aria-label={`Show ${b.name} balance`}
+            className="shrink-0 flex items-center gap-1 rounded-lg px-2.5 py-1.5 active:scale-95 transition"
+            style={{ background: `linear-gradient(135deg, ${b.color}22, ${b.color}11)` }}>
+            <span className="font-black tracking-widest text-sm" style={{ color: b.color }}>••••</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={b.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
+              <line x1="1" y1="1" x2="23" y2="23" />
+            </svg>
+          </button>
+        </div>
+        {/* BACK — amount revealed */}
+        <div className={faceBase} style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+          <div className="w-2 self-stretch my-3 rounded-full shrink-0" style={{ backgroundColor: b.color }} />
+          <button onClick={() => !locked && onSelect(b)} disabled={locked} className="flex-1 min-w-0 text-left disabled:cursor-not-allowed">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-dark text-sm truncate">{b.name}</span>
+              {locked && <span className="text-xs">🔒</span>}
+            </div>
+            <p className="font-black text-dark tabular-nums mt-0.5">{formatTZS(b.balance)}</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">{locked ? 'Locked' : 'Tap to send from here'}</p>
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); setRev(false); }} aria-label={`Hide ${b.name} balance`}
+            className="shrink-0 p-1.5 rounded-lg active:scale-95 transition" style={{ background: `${b.color}14` }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={b.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 export default function SendModal({ onClose, onSuccess, bahashas }) {
   const [step, setStep] = useState('pick'); // pick | form | processing | done
   const [bahasha, setBahasha] = useState(null);
@@ -61,29 +128,14 @@ export default function SendModal({ onClose, onSuccess, bahashas }) {
         className="bg-white rounded-t-3xl w-full max-w-md max-h-[92vh] overflow-y-auto shadow-premium" onClick={e => e.stopPropagation()}>
         <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mt-3" />
 
-        {/* STEP 1 — pick bahasha */}
+        {/* STEP 1 — pick bahasha (closed concept; flip 👁 to peek) */}
         {step === 'pick' && (
           <div className="p-6">
             <h2 className="text-xl font-black text-dark mb-1">Send money</h2>
-            <p className="text-sm text-gray-500 mb-5">Which bahasha are you sending from?</p>
+            <p className="text-sm text-gray-500 mb-1">Which bahasha are you sending from?</p>
+            <p className="text-[11px] text-gray-400 mb-4">Tap a bahasha to choose it · tap 👁 to peek at the balance</p>
             <div className="space-y-2.5">
-              {bahashas.map(b => {
-                const locked = b.isLocked && b.lockUntil && new Date(b.lockUntil) > new Date();
-                return (
-                  <button key={b.id} onClick={() => !locked && pick(b)} disabled={locked}
-                    className={`w-full flex items-center gap-3 rounded-2xl p-4 border text-left transition ${locked ? 'border-gray-100 opacity-50 cursor-not-allowed' : 'border-gray-200 hover:border-dusco hover:bg-dusco-light/30'}`}>
-                    <div className="w-2 h-10 rounded-full shrink-0" style={{ backgroundColor: b.color }} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-dark text-sm">{b.name}</span>
-                        {locked && <span className="text-xs">🔒</span>}
-                      </div>
-                      <span className="text-[11px] text-gray-500">{locked ? 'Locked' : 'Available'}</span>
-                    </div>
-                    <span className="font-black text-dark text-sm tabular-nums">{formatTZS(b.balance)}</span>
-                  </button>
-                );
-              })}
+              {bahashas.map(b => <PickRow key={b.id} b={b} onSelect={pick} />)}
             </div>
           </div>
         )}
