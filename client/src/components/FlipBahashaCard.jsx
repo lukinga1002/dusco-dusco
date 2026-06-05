@@ -56,17 +56,6 @@ export default function FlipBahashaCard({ bahasha: b, revealed, expanded, onTogg
                 {b.isLocked && <span className="text-xs">🔒</span>}
                 <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">{b.percentage}%</span>
               </div>
-              {hasGoal && (
-                <>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${barPct}%`, backgroundColor: barColor }} />
-                    </div>
-                    <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: barColor }}>{barLabel}</span>
-                  </div>
-                  <p className="text-[10px] text-gray-400 mt-1 truncate">{barCaption}</p>
-                </>
-              )}
             </button>
             {/* Tap THIS chip to flip just this bahasha */}
             <button onClick={flip} aria-label={`Show ${b.name} amount`}
@@ -92,9 +81,15 @@ export default function FlipBahashaCard({ bahasha: b, revealed, expanded, onTogg
               </div>
               <p className="font-black text-dark tabular-nums mt-0.5">{formatTZS(b.balance)}</p>
               {hasGoal && (
-                <p className="text-[10px] text-gray-500 mt-0.5 tabular-nums">
-                  {reached ? '✓ Goal reached!' : `${formatTZS(b.balance)} / ${formatTZS(b.goalAmount)}`}
-                </p>
+                <div className="mt-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${barPct}%`, backgroundColor: barColor }} />
+                    </div>
+                    <span className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: barColor }}>{barLabel}</span>
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-0.5 truncate">{barCaption}</p>
+                </div>
               )}
             </button>
             {/* Tap to hide this bahasha again */}

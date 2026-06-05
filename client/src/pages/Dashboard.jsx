@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../utils/api';
@@ -10,6 +11,7 @@ import FlipBahashaCard from '../components/FlipBahashaCard';
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [walletData, setWalletData] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [showDeposit, setShowDeposit] = useState(false);
@@ -110,6 +112,12 @@ export default function Dashboard() {
               txnIcon={txnIcon}
             />
           ))}
+          {walletData.bahashas.length < 6 && (
+            <button onClick={() => navigate('/manage', { state: { openAdd: true } })}
+              className="w-full py-3 rounded-2xl border-2 border-dashed border-gray-200 text-sm font-medium text-gray-500 hover:border-dusco hover:text-dusco transition">
+              + Add Bahasha
+            </button>
+          )}
         </div>
       </div>
 

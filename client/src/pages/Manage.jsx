@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../utils/api';
 import { formatTZS } from '../utils/format';
@@ -29,6 +30,12 @@ export default function Manage() {
   };
 
   useEffect(() => { load(); }, []);
+
+  // Open the add flow automatically when arriving from the dashboard "+ Add Bahasha"
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.openAdd) setAddMode(true);
+  }, [location.state]);
 
   const total = allocations.reduce((s, a) => s + a.percentage, 0);
 
@@ -280,8 +287,8 @@ export default function Manage() {
         {addMode && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl border border-dusco/30 p-4 shadow-sm">
-            <h4 className="font-heading font-semibold text-sm mb-3">New Envelope</h4>
-            <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Envelope name"
+            <h4 className="font-heading font-semibold text-sm mb-3">New Bahasha</h4>
+            <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Bahasha name"
               className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm mb-2 bg-gray-50" />
             <div className="flex items-center gap-2 mb-3">
               <input type="range" min="0" max="100" value={newPct} onChange={e => setNewPct(Number(e.target.value))}
