@@ -26,8 +26,9 @@ export default function FlipBahashaCard({ bahasha: b, revealed, expanded, onTogg
   const barLabel = hasGoal ? (reached ? '✓' : `${goalPct}%`) : `${b.percentage}%`;
   const barCaption = hasGoal ? (reached ? `Target reached — ${b.goalName} 🎉` : `to reach ${b.goalName}`) : 'of each deposit';
   const barColor = reached ? '#16A34A' : b.color;
-  // No-target bahashas stay minimal (name + %); only goal bahashas get the bar
-  const faceH = hasGoal ? 'h-[88px]' : 'h-[60px]';
+  // Uniform height for every card; no-target ones just show name + % (centered),
+  // goal ones add the progress bar + "to reach target" caption.
+  const faceH = 'h-[84px]';
   const faceBase = `absolute inset-0 flex items-center gap-2.5 px-4 ${faceH}`;
 
   const Chevron = () => (
