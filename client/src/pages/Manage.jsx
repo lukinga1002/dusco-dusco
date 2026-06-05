@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../utils/api';
@@ -11,7 +11,9 @@ export default function Manage() {
   const [allocations, setAllocations] = useState([]);
   const [addMode, setAddMode] = useState(false);
   const [newName, setNewName] = useState('');
-  const [newPct, setNewPct] = useState(0);
+  const [addAllocs, setAddAllocs] = useState([]); // [{id|'new', name, percentage}]
+  const addHandled = useRef(false);
+  const ADD_COLORS = ['#ED1B24', '#3B82F6', '#16A34A', '#F59E0B', '#8B5CF6', '#EC4899'];
   const [lockModal, setLockModal] = useState(null);
   const [lockDate, setLockDate] = useState('');
   const [deleteModal, setDeleteModal] = useState(null);
@@ -34,8 +36,11 @@ export default function Manage() {
   // Open the add flow automatically when arriving from the dashboard "+ Add Bahasha"
   const location = useLocation();
   useEffect(() => {
-    if (location.state?.openAdd) setAddMode(true);
-  }, [location.state]);
+    if (location.state?.openAdd && bahashas.length && !addHandled.current) {
+      addHandled.current = true;
+      startAdd();
+    }
+  }, [location.state, bahashas]);
 
   const total = allocations.reduce((s, a) => s + a.percentage, 0);
 
@@ -71,14 +76,41 @@ export default function Manage() {
   };
 
   // ── Add bahasha ──
+  // Open the add flow with a rebalance editor seeded from current bahashas + a new (0%) entry
+  const startAdd = () => {
+    setError('');
+    setAddAllocs([
+      ...bahashas.map(b => ({ id: b.id, name: b.name, percentage: b.percentage })),
+      { id: 'new', name: '', percentage: 0 },
+    ]);
+    setAddMode(true);
+  };
+
+  const addTotal = addAllocs.reduce((s, a) => s + a.percentage, 0);
+  const newEntry = addAllocs.find(a => a.id === 'new');
+
+  const updateAddAlloc = (id, pct) => setAddAllocs(prev => prev.map(a => a.id === id ? { ...a, percentage: Math.max(0, Math.min(100, Number(pct) || 0)) } : a));
+  const updateNewName = (val) => setAddAllocs(prev => prev.map(a => a.id === 'new' ? { ...a, name: val } : a));
+  const autoBalanceAdd = () => {
+    const each = Math.floor(100 / addAllocs.length);
+    const remainder = 100 - each * addAllocs.length;
+    setAddAllocs(prev => prev.map((a, i) => ({ ...a, percentage: each + (i === 0 ? remainder : 0) })));
+  };
+
+  const cancelAdd = () => { setAddMode(false); setAddAllocs([]); addHandled.current = false; };
+
   const handleAdd = async () => {
-    if (!newName.trim()) return setError('Name required');
+    if (!newEntry?.name.trim()) return setError('Enter a name for the new bahasha');
+    if (Math.abs(addTotal - 100) > 0.01) return setError(`Percentages must total 100%. Currently ${addTotal}%`);
     try {
-      await api.createWallet({ name: newName, percentage: newPct });
+      // Create the new bahasha at 0%, then rebalance every bahasha to the new values
+      const created = await api.createWallet({ name: newEntry.name.trim(), percentage: 0 });
+      const allocations = addAllocs.map(a => ({ id: a.id === 'new' ? created.id : a.id, percentage: a.percentage }));
+      await api.rebalance(allocations);
       setAddMode(false);
-      setNewName('');
-      setNewPct(0);
-      setMsg('Envelope added');
+      setAddAllocs([]);
+      addHandled.current = false;
+      setMsg('Bahasha added & percentages rebalanced');
       load();
     } catch (err) { setError(err.message); }
   };
@@ -278,7 +310,7 @@ export default function Manage() {
 
         {/* Add new */}
         {bahashas.length < 6 && !addMode && (
-          <button onClick={() => setAddMode(true)}
+          <button onClick={startAdd}
             className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-sm text-gray-500 hover:border-dusco hover:text-dusco transition">
             + Add Bahasha ({bahashas.length}/6)
           </button>
@@ -287,19 +319,43 @@ export default function Manage() {
         {addMode && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl border border-dusco/30 p-4 shadow-sm">
-            <h4 className="font-heading font-semibold text-sm mb-3">New Bahasha</h4>
-            <input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Bahasha name"
-              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm mb-2 bg-gray-50" />
-            <div className="flex items-center gap-2 mb-3">
-              <input type="range" min="0" max="100" value={newPct} onChange={e => setNewPct(Number(e.target.value))}
-                className="flex-1 accent-dusco" />
-              <span className="text-sm font-medium w-12 text-center">{newPct}%</span>
+            <h4 className="font-heading font-semibold text-sm">Add Bahasha</h4>
+            <p className="text-[11px] text-gray-500 mb-3">Name it, then re-assign percentages so they total 100%.</p>
+
+            <input value={newEntry?.name || ''} onChange={e => updateNewName(e.target.value)} placeholder="New bahasha name"
+              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm mb-3 bg-gray-50" />
+
+            {/* Allocation bar */}
+            <div className="flex h-3 rounded-full overflow-hidden bg-gray-100 mb-1">
+              {addAllocs.map((a, i) => a.percentage > 0 ? (
+                <div key={a.id} className="transition-all" style={{ width: `${a.percentage}%`, backgroundColor: ADD_COLORS[i % ADD_COLORS.length] }} />
+              ) : null)}
             </div>
+            <div className="flex justify-between items-center mb-3">
+              <span className={`text-xs font-bold ${Math.abs(addTotal - 100) < 0.01 ? 'text-success' : 'text-error'}`}>{addTotal}% / 100%</span>
+              <button onClick={autoBalanceAdd} className="text-xs text-dusco font-semibold">Auto-balance</button>
+            </div>
+
+            {/* Per-bahasha sliders (existing + new) */}
+            <div className="space-y-2 mb-3">
+              {addAllocs.map((a, i) => (
+                <div key={a.id} className="flex items-center gap-2">
+                  <span className="w-2 h-6 rounded-full shrink-0" style={{ backgroundColor: ADD_COLORS[i % ADD_COLORS.length] }} />
+                  <span className="text-xs font-medium text-dark w-20 truncate">{a.id === 'new' ? (a.name || 'New') : a.name}</span>
+                  <input type="range" min="0" max="100" value={a.percentage} onChange={e => updateAddAlloc(a.id, e.target.value)} className="flex-1 accent-dusco" />
+                  <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg px-1.5 w-14">
+                    <input type="number" min="0" max="100" value={a.percentage} onChange={e => updateAddAlloc(a.id, e.target.value)}
+                      className="w-full py-1 text-xs text-center border-none bg-transparent focus:outline-none" />
+                    <span className="text-[10px] text-gray-400">%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <div className="flex gap-2">
-              <button onClick={() => { setAddMode(false); setNewName(''); setNewPct(0); }}
-                className="flex-1 py-2 rounded-xl bg-gray-100 text-xs font-medium text-gray-500">Cancel</button>
-              <button onClick={handleAdd}
-                className="flex-1 py-2 rounded-xl bg-dusco text-white text-xs font-semibold">Add</button>
+              <button onClick={cancelAdd} className="flex-1 py-2 rounded-xl bg-gray-100 text-xs font-medium text-gray-500">Cancel</button>
+              <button onClick={handleAdd} disabled={Math.abs(addTotal - 100) > 0.01 || !newEntry?.name.trim()}
+                className="flex-1 py-2 rounded-xl bg-dusco text-white text-xs font-semibold disabled:opacity-40">Add & Save</button>
             </div>
           </motion.div>
         )}
