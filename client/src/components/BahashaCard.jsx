@@ -13,7 +13,7 @@ export default function BahashaCard({ bahasha, onClick }) {
             <h3 className="font-heading font-semibold text-dark text-sm">{bahasha.name}</h3>
             {bahasha.isLocked && <span className="text-xs" title="Locked">🔒</span>}
           </div>
-          <p className="text-xs text-gray-400 mt-0.5">{bahasha.percentage}% allocation</p>
+          <p className="text-xs text-gray-500 mt-0.5">{bahasha.percentage}% allocation</p>
         </div>
         <span className={`w-3 h-3 rounded-full ${colorClass}`}></span>
       </div>

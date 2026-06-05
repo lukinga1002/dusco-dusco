@@ -59,11 +59,11 @@ export default function DepositModal({ onClose, onSuccess, bahashas, duscoNumber
             {/* Mode tabs */}
             <div className="flex gap-1 bg-surface rounded-xl p-1 mb-5">
               <button onClick={() => setMode('receive')}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${mode === 'receive' ? 'bg-white text-dusco shadow-card' : 'text-gray-400'}`}>
+                className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${mode === 'receive' ? 'bg-white text-dusco shadow-card' : 'text-gray-500'}`}>
                 Receive money
               </button>
               <button onClick={() => setMode('quick')}
-                className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${mode === 'quick' ? 'bg-white text-dusco shadow-card' : 'text-gray-400'}`}>
+                className={`flex-1 py-2 rounded-lg text-xs font-bold transition ${mode === 'quick' ? 'bg-white text-dusco shadow-card' : 'text-gray-500'}`}>
                 Quick add
               </button>
             </div>
@@ -108,7 +108,7 @@ export default function DepositModal({ onClose, onSuccess, bahashas, duscoNumber
                 {/* Demo simulator */}
                 <div className="border-t border-gray-100 pt-4">
                   <p className="text-xs font-bold text-gray-500 mb-3">Demo — simulate an incoming transfer</p>
-                  <label className="block text-[11px] font-semibold text-gray-400 mb-1">Amount sent (TZS)</label>
+                  <label className="block text-[11px] font-semibold text-gray-500 mb-1">Amount sent (TZS)</label>
                   <input type="number" value={amount} onChange={e => setAmount(e.target.value)}
                     placeholder="e.g. 100000" className="w-full px-4 py-3 rounded-xl border border-gray-200 text-lg font-black bg-surface" />
                   <div className="flex gap-2 mt-2 mb-3">
@@ -121,14 +121,14 @@ export default function DepositModal({ onClose, onSuccess, bahashas, duscoNumber
                   </div>
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     <div>
-                      <label className="block text-[11px] font-semibold text-gray-400 mb-1">Sender network</label>
+                      <label className="block text-[11px] font-semibold text-gray-500 mb-1">Sender network</label>
                       <select value={network} onChange={e => setNetwork(e.target.value)}
                         className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm bg-surface">
                         {NETWORKS.map(n => <option key={n} value={n}>{n}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-[11px] font-semibold text-gray-400 mb-1">Sender phone</label>
+                      <label className="block text-[11px] font-semibold text-gray-500 mb-1">Sender phone</label>
                       <input value={senderPhone} onChange={e => setSenderPhone(e.target.value)} placeholder="0765…"
                         className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm bg-surface" />
                     </div>
@@ -186,7 +186,7 @@ export default function DepositModal({ onClose, onSuccess, bahashas, duscoNumber
 
                 {net > 0 && (
                   <div className="mb-5">
-                    <p className="text-xs text-gray-400 mb-2">Split preview:</p>
+                    <p className="text-xs text-gray-500 mb-2">Split preview:</p>
                     {bahashas.map(b => (
                       <div key={b.id} className="flex justify-between py-1 text-xs">
                         <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color }} />{b.name} ({b.percentage}%)</span>
@@ -213,7 +213,7 @@ export default function DepositModal({ onClose, onSuccess, bahashas, duscoNumber
             <p className="mt-4 text-sm text-gray-500 font-medium">
               {result?.external ? `Receiving from ${result?.senderPhone || 'sender'}…` : `Processing via ${result?.sourceNetwork}…`}
             </p>
-            <p className="mt-1 text-xs text-gray-400">Splitting across your bahashas</p>
+            <p className="mt-1 text-xs text-gray-500">Splitting across your bahashas</p>
           </div>
         )}
 
@@ -231,7 +231,7 @@ export default function DepositModal({ onClose, onSuccess, bahashas, duscoNumber
               </motion.p>
               {result.crossNetworkFee > 0 && (
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
-                  className="text-xs text-gray-400">Fee: {formatTZS(result.crossNetworkFee)}</motion.p>
+                  className="text-xs text-gray-500">Fee: {formatTZS(result.crossNetworkFee)}</motion.p>
               )}
             </motion.div>
 
@@ -245,7 +245,7 @@ export default function DepositModal({ onClose, onSuccess, bahashas, duscoNumber
                   style={{ backgroundColor: `${split.color}10`, borderLeft: `4px solid ${split.color}` }}>
                   <div>
                     <p className="font-bold text-sm text-dark">{split.bahashaName}</p>
-                    <p className="text-[10px] text-gray-400">{split.percentage}%</p>
+                    <p className="text-[10px] text-gray-500">{split.percentage}%</p>
                   </div>
                   <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}
                     transition={{ type: 'spring', delay: 0.9 + i * 0.15, damping: 10 }}

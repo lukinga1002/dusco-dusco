@@ -100,7 +100,7 @@ export default function GroupCreate() {
         {step === 2 && (
           <div className="space-y-4">
             <h3 className="font-bold text-dark">Social Fund Bahashas</h3>
-            <p className="text-xs text-gray-400">How should social fund contributions be split?</p>
+            <p className="text-xs text-gray-500">How should social fund contributions be split?</p>
             <div className="flex h-3 rounded-full overflow-hidden bg-gray-100 mb-1">
               {bahashas.map((b, i) => {
                 const colors = ['bg-dusco', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500', 'bg-pink-500'];
@@ -129,7 +129,7 @@ export default function GroupCreate() {
 
             {bahashas.length < 6 && (
               <button onClick={() => setBahashas([...bahashas, { name: '', percentage: 0 }])}
-                className="w-full py-2.5 rounded-xl border-2 border-dashed border-gray-200 text-xs text-gray-400 hover:border-dusco hover:text-dusco transition">+ Add Bahasha</button>
+                className="w-full py-2.5 rounded-xl border-2 border-dashed border-gray-200 text-xs text-gray-500 hover:border-dusco hover:text-dusco transition">+ Add Bahasha</button>
             )}
 
             <div className="flex gap-3">
@@ -143,7 +143,7 @@ export default function GroupCreate() {
         {step === 3 && (
           <div className="space-y-4">
             <h3 className="font-bold text-dark">Invite Members</h3>
-            <p className="text-xs text-gray-400">Add members by phone number (they must have a Dusco account)</p>
+            <p className="text-xs text-gray-500">Add members by phone number (they must have a Dusco account)</p>
             <div className="flex gap-2">
               <input value={phoneInput} onChange={e => setPhoneInput(e.target.value)} placeholder="07XXXXXXXX"
                 className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm bg-surface"

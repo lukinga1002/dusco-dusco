@@ -65,7 +65,7 @@ export default function SetupBahashas() {
     <div className="flex-1 flex flex-col px-6 py-8 overflow-y-auto">
       <div className="text-center mb-6">
         <h1 className="font-heading text-2xl font-bold text-dark mb-1">Set Up Your Bahashas</h1>
-        <p className="text-sm text-gray-400">Create 2-6 savings envelopes and set how deposits are split</p>
+        <p className="text-sm text-gray-500">Create 2-6 savings envelopes and set how deposits are split</p>
         {state?.duscoNumber && (
           <div className="mt-3 inline-block bg-dusco-light text-dusco text-xs font-heading font-semibold px-3 py-1.5 rounded-full">
             Your Dusco Number: {state.duscoNumber}
@@ -100,7 +100,7 @@ export default function SetupBahashas() {
           return (
             <div key={i} className={`bg-gray-50 rounded-2xl p-4 border-l-4 ${colors[i % colors.length]}`}>
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs text-gray-400 font-medium w-5">{i + 1}.</span>
+                <span className="text-xs text-gray-500 font-medium w-5">{i + 1}.</span>
                 <input type="text" value={b.name} onChange={e => update(i, 'name', e.target.value)}
                   placeholder="Envelope name" className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-sm bg-white" required />
                 {bahashas.length > 2 && (
@@ -117,7 +117,7 @@ export default function SetupBahashas() {
                   <input type="number" min="0" max="100" value={b.percentage}
                     onChange={e => update(i, 'percentage', e.target.value)}
                     className="w-full py-1.5 text-sm text-center border-none bg-transparent focus:outline-none" />
-                  <span className="text-xs text-gray-400">%</span>
+                  <span className="text-xs text-gray-500">%</span>
                 </div>
               </div>
               {/* Preset suggestions */}
@@ -137,7 +137,7 @@ export default function SetupBahashas() {
 
         {bahashas.length < 6 && (
           <button type="button" onClick={addBahasha}
-            className="w-full py-3 rounded-2xl border-2 border-dashed border-gray-200 text-sm text-gray-400 hover:border-dusco hover:text-dusco transition">
+            className="w-full py-3 rounded-2xl border-2 border-dashed border-gray-200 text-sm text-gray-500 hover:border-dusco hover:text-dusco transition">
             + Add Envelope ({bahashas.length}/6)
           </button>
         )}

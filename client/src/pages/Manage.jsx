@@ -130,7 +130,7 @@ export default function Manage() {
       <div className="px-4 pt-4 pb-2 flex items-center justify-between">
         <div>
           <h2 className="font-heading text-lg font-bold text-dark">Manage Envelopes</h2>
-          <p className="text-xs text-gray-400">{bahashas.length} envelope{bahashas.length !== 1 ? 's' : ''}</p>
+          <p className="text-xs text-gray-500">{bahashas.length} envelope{bahashas.length !== 1 ? 's' : ''}</p>
         </div>
         {!rebalancing && (
           <button onClick={startRebalance} className="text-xs text-dusco font-semibold bg-dusco-light px-3 py-1.5 rounded-full">
@@ -175,7 +175,7 @@ export default function Manage() {
               <div className="flex items-center bg-white border border-gray-200 rounded-lg px-1.5 w-16">
                 <input type="number" min="0" max="100" value={a.percentage} onChange={e => updateAlloc(i, e.target.value)}
                   className="w-full py-1 text-xs text-center border-none bg-transparent focus:outline-none" />
-                <span className="text-[10px] text-gray-400">%</span>
+                <span className="text-[10px] text-gray-500">%</span>
               </div>
             </div>
           ))}
@@ -204,23 +204,23 @@ export default function Manage() {
                         <input name="name" defaultValue={b.name} autoFocus
                           className="px-2 py-1 rounded-lg border border-gray-200 text-sm flex-1" />
                         <button type="submit" className="text-xs text-success font-medium">Save</button>
-                        <button type="button" onClick={() => setEditing(null)} className="text-xs text-gray-400">Cancel</button>
+                        <button type="button" onClick={() => setEditing(null)} className="text-xs text-gray-500">Cancel</button>
                       </form>
                     ) : (
                       <div className="flex items-center gap-2">
                         <h3 className="font-heading font-semibold text-dark">{b.name}</h3>
                         {b.isLocked && <span className="text-xs">🔒</span>}
-                        <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{b.percentage}%</span>
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{b.percentage}%</span>
                       </div>
                     )}
                     <p className="font-heading font-bold text-lg text-dark mt-1">{formatTZS(b.balance)}</p>
-                    {b.goalName && <p className="text-[10px] text-gray-400">{b.goalName}</p>}
+                    {b.goalName && <p className="text-[10px] text-gray-500">{b.goalName}</p>}
                     {b.goalAmount && (
                       <div className="mt-1.5">
                         <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (b.balance / b.goalAmount) * 100)}%`, backgroundColor: b.balance >= b.goalAmount ? '#22C55E' : (colors[i % colors.length].includes('dusco') ? '#1B2F8F' : '#3B82F6') }} />
                         </div>
-                        <p className="text-[10px] text-gray-400 mt-0.5 tabular-nums">
+                        <p className="text-[10px] text-gray-500 mt-0.5 tabular-nums">
                           {b.balance >= b.goalAmount ? '✓ Goal reached!' : `${formatTZS(b.balance)} / ${formatTZS(b.goalAmount)}`}
                         </p>
                       </div>
@@ -272,7 +272,7 @@ export default function Manage() {
         {/* Add new */}
         {bahashas.length < 6 && !addMode && (
           <button onClick={() => setAddMode(true)}
-            className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-sm text-gray-400 hover:border-dusco hover:text-dusco transition">
+            className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-sm text-gray-500 hover:border-dusco hover:text-dusco transition">
             + Add Envelope ({bahashas.length}/6)
           </button>
         )}
@@ -306,7 +306,7 @@ export default function Manage() {
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
             className="bg-white rounded-3xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
             <h3 className="font-heading font-bold text-lg mb-1">Lock "{lockModal.name}"</h3>
-            <p className="text-xs text-gray-400 mb-4">Funds cannot be withdrawn until the lock date. Early unlock costs 2% penalty.</p>
+            <p className="text-xs text-gray-500 mb-4">Funds cannot be withdrawn until the lock date. Early unlock costs 2% penalty.</p>
             <label className="block text-xs font-medium text-gray-500 mb-1.5">Lock Until</label>
             <input type="date" value={lockDate} onChange={e => setLockDate(e.target.value)}
               min={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
@@ -327,7 +327,7 @@ export default function Manage() {
             <h3 className="font-heading font-bold text-lg mb-1">Remove "{deleteModal.name}"</h3>
             {deleteModal.balance > 0 ? (
               <>
-                <p className="text-xs text-gray-400 mb-4">
+                <p className="text-xs text-gray-500 mb-4">
                   This envelope has {formatTZS(deleteModal.balance)}. Transfer the balance to another envelope first.
                 </p>
                 <label className="block text-xs font-medium text-gray-500 mb-1.5">Transfer balance to</label>
@@ -340,7 +340,7 @@ export default function Manage() {
                 </select>
               </>
             ) : (
-              <p className="text-xs text-gray-400 mb-4">This envelope has no balance. It will be removed.</p>
+              <p className="text-xs text-gray-500 mb-4">This envelope has no balance. It will be removed.</p>
             )}
             <div className="flex gap-2">
               <button onClick={() => setDeleteModal(null)} className="flex-1 py-3 rounded-2xl bg-gray-100 text-sm font-medium text-gray-500">Cancel</button>
@@ -357,7 +357,7 @@ export default function Manage() {
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
             className="bg-white rounded-3xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
             <h3 className="font-heading font-bold text-lg mb-1">🎯 Set Goal for "{goalModal.name}"</h3>
-            <p className="text-xs text-gray-400 mb-4">Track progress toward a savings target</p>
+            <p className="text-xs text-gray-500 mb-4">Track progress toward a savings target</p>
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">Goal Name</label>

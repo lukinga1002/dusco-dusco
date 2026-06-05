@@ -38,14 +38,14 @@ export default function NotificationBell() {
             {unread > 0 && <button onClick={handleMarkAllRead} className="text-xs text-dusco">Mark all read</button>}
           </div>
           {notifs.length === 0 ? (
-            <p className="px-4 py-6 text-center text-sm text-gray-400">No notifications</p>
+            <p className="px-4 py-6 text-center text-sm text-gray-500">No notifications</p>
           ) : notifs.map(n => (
             <div key={n.id} className={`px-4 py-3 border-b border-gray-50 ${!n.isRead ? 'bg-dusco-light/30' : ''}`}>
               <div className="flex gap-2">
                 <span className="text-lg">{typeIcon[n.type] || '📢'}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-dark-soft leading-relaxed">{n.message}</p>
-                  <p className="text-[10px] text-gray-400 mt-1">{timeAgo(n.createdAt)}</p>
+                  <p className="text-[10px] text-gray-500 mt-1">{timeAgo(n.createdAt)}</p>
                 </div>
               </div>
             </div>

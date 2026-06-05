@@ -46,7 +46,7 @@ export default function Earnings() {
               </div>
               <div>
                 <p className="text-xs font-medium text-dark">Your savings earn returns</p>
-                <p className="text-[10px] text-gray-400">Funds are invested in government securities (T-bills)</p>
+                <p className="text-[10px] text-gray-500">Funds are invested in government securities (T-bills)</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -55,7 +55,7 @@ export default function Earnings() {
               </div>
               <div>
                 <p className="text-xs font-medium text-dark">Estimated {projection?.annualReturnRate} annual return</p>
-                <p className="text-[10px] text-gray-400">Based on current T-bill yields</p>
+                <p className="text-[10px] text-gray-500">Based on current T-bill yields</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -64,7 +64,7 @@ export default function Earnings() {
               </div>
               <div>
                 <p className="text-xs font-medium text-dark">You get 30% of profits</p>
-                <p className="text-[10px] text-gray-400">Distributed proportionally by your average balance</p>
+                <p className="text-[10px] text-gray-500">Distributed proportionally by your average balance</p>
               </div>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function Earnings() {
             </div>
             <div className="flex justify-between text-xs border-t border-gray-100 pt-2">
               <span className="text-gray-500">Company share (70%)</span>
-              <span className="text-gray-400">{formatTZS(Math.round((projection?.estimatedAnnualReturn || 0) * 0.7))}</span>
+              <span className="text-gray-500">{formatTZS(Math.round((projection?.estimatedAnnualReturn || 0) * 0.7))}</span>
             </div>
             <div className="flex justify-between text-xs">
               <span className="text-gray-500 font-medium">Your share (30%)</span>
@@ -101,28 +101,27 @@ export default function Earnings() {
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
           <h3 className="font-heading font-semibold text-sm text-dark mb-3">Per Envelope Breakdown</h3>
           <div className="space-y-2.5">
-            {projection?.perBahasha?.map((b, i) => {
-              const barColors = ['bg-dusco', 'bg-blue-500', 'bg-amber-500', 'bg-emerald-500', 'bg-purple-500', 'bg-pink-500'];
-              return (
-                <div key={b.id}>
-                  <div className="flex justify-between items-center text-xs mb-1">
-                    <span className="text-gray-600 font-medium">{b.name}</span>
-                    <span className="text-success font-semibold">+{formatTZS(b.projectedDividend)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${barColors[i % barColors.length]}`}
-                        style={{ width: `${b.shareOfTotal}%` }} />
-                    </div>
-                    <span className="text-[10px] text-gray-400 w-8">{b.shareOfTotal}%</span>
-                  </div>
+            {projection?.perBahasha?.map((b) => (
+              <div key={b.id}>
+                <div className="flex justify-between items-center text-xs mb-1">
+                  <span className="text-gray-600 font-medium flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color || '#1B2F8F' }} />
+                    {b.name}
+                  </span>
+                  <span className="text-success font-semibold">+{formatTZS(b.projectedDividend)}</span>
                 </div>
-              );
-            })}
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${b.shareOfTotal}%`, backgroundColor: b.color || '#1B2F8F' }} />
+                  </div>
+                  <span className="text-[10px] text-gray-500 w-8">{b.shareOfTotal}%</span>
+                </div>
+              </div>
+            ))}
           </div>
 
           {projection?.defaultRecipientBahasha && (
-            <div className="mt-3 bg-gray-50 rounded-xl px-3 py-2 text-[10px] text-gray-400">
+            <div className="mt-3 bg-gray-50 rounded-xl px-3 py-2 text-[10px] text-gray-500">
               Dividends credited to: <span className="font-medium text-dark">{projection.defaultRecipientBahasha.name}</span> (largest balance)
             </div>
           )}
@@ -132,7 +131,7 @@ export default function Earnings() {
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-4">
           <h3 className="font-heading font-semibold text-sm text-dark mb-3">Dividend History</h3>
           {history?.dividends?.length === 0 ? (
-            <p className="text-center text-xs text-gray-400 py-4">No dividends credited yet</p>
+            <p className="text-center text-xs text-gray-500 py-4">No dividends credited yet</p>
           ) : (
             <>
               <div className="bg-success/10 rounded-xl px-4 py-3 text-center mb-3">
@@ -145,7 +144,7 @@ export default function Earnings() {
                     <span className="text-lg">🎉</span>
                     <div className="flex-1">
                       <p className="text-xs font-medium text-dark">{d.description}</p>
-                      <p className="text-[10px] text-gray-400">{formatDate(d.creditedAt)} · {d.bahashaName}</p>
+                      <p className="text-[10px] text-gray-500">{formatDate(d.creditedAt)} · {d.bahashaName}</p>
                     </div>
                     <span className="text-sm font-heading font-bold text-success">+{formatTZS(d.amount)}</span>
                   </div>

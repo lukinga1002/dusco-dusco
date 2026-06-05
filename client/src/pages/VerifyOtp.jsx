@@ -48,7 +48,7 @@ export default function VerifyOtp() {
           <span className="text-2xl">📱</span>
         </div>
         <h1 className="font-heading text-2xl font-bold text-dark mb-2">Verify Your Phone</h1>
-        <p className="text-sm text-gray-400">Enter the 4-digit code sent to <span className="font-medium text-dark">{phone}</span></p>
+        <p className="text-sm text-gray-500">Enter the 4-digit code sent to <span className="font-medium text-dark">{phone}</span></p>
         <p className="text-xs text-gray-300 mt-1">(Demo: any 4 digits work)</p>
       </div>
 

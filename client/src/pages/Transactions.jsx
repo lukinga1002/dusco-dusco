@@ -50,7 +50,7 @@ export default function Transactions() {
     <div className="flex-1 flex flex-col overflow-y-auto">
       <div className="px-4 pt-4 pb-2">
         <h2 className="font-heading text-lg font-bold text-dark">Transaction History</h2>
-        <p className="text-xs text-gray-400">{total} transaction{total !== 1 ? 's' : ''}</p>
+        <p className="text-xs text-gray-500">{total} transaction{total !== 1 ? 's' : ''}</p>
       </div>
 
       {/* Filters */}
@@ -88,7 +88,7 @@ export default function Transactions() {
         ) : transactions.length === 0 ? (
           <div className="text-center py-12">
             <span className="text-3xl">📭</span>
-            <p className="text-sm text-gray-400 mt-2">No transactions found</p>
+            <p className="text-sm text-gray-500 mt-2">No transactions found</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -97,7 +97,7 @@ export default function Transactions() {
                 <span className="text-lg shrink-0">{TYPE_ICONS[t.type] || '📝'}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-dark truncate">{t.description}</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">
+                  <p className="text-[10px] text-gray-500 mt-0.5">
                     {formatDateTime(t.createdAt)}
                     {t.bahashaName ? ` · ${t.bahashaName}` : ''}
                     {t.sourceNetwork ? ` · via ${t.sourceNetwork}` : ''}
@@ -121,7 +121,7 @@ export default function Transactions() {
             className="px-3 py-1.5 rounded-xl bg-gray-100 text-xs font-medium disabled:opacity-30">
             ← Prev
           </button>
-          <span className="text-xs text-gray-400">{currentPage} of {pages}</span>
+          <span className="text-xs text-gray-500">{currentPage} of {pages}</span>
           <button onClick={() => setOffset(offset + limit)} disabled={currentPage >= pages}
             className="px-3 py-1.5 rounded-xl bg-gray-100 text-xs font-medium disabled:opacity-30">
             Next →

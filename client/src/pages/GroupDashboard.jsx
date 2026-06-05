@@ -43,7 +43,7 @@ export default function GroupDashboard() {
   const txnIcon = { share_contribution: '💰', social_contribution: '✉️', withdrawal: '💸', dividend: '🎉' };
 
   if (loading) return <div className="flex-1 flex items-center justify-center"><div className="w-6 h-6 border-2 border-dusco border-t-transparent rounded-full animate-spin" /></div>;
-  if (!data) return <div className="flex-1 flex items-center justify-center text-gray-400">Group not found</div>;
+  if (!data) return <div className="flex-1 flex items-center justify-center text-gray-500">Group not found</div>;
 
   const { group, bahashas, members, recentTransactions, userRole, socialBalance, sharesTotal } = data;
 
@@ -67,8 +67,8 @@ export default function GroupDashboard() {
 
       {/* Tabs */}
       <div className="flex border-b border-gray-100">
-        <button onClick={() => setTab('social')} className={`flex-1 py-3 text-xs font-bold text-center transition ${tab === 'social' ? 'text-dusco border-b-2 border-dusco' : 'text-gray-400'}`}>Social Fund</button>
-        <button onClick={() => setTab('shares')} className={`flex-1 py-3 text-xs font-bold text-center transition ${tab === 'shares' ? 'text-dusco border-b-2 border-dusco' : 'text-gray-400'}`}>Shares</button>
+        <button onClick={() => setTab('social')} className={`flex-1 py-3 text-xs font-bold text-center transition ${tab === 'social' ? 'text-dusco border-b-2 border-dusco' : 'text-gray-500'}`}>Social Fund</button>
+        <button onClick={() => setTab('shares')} className={`flex-1 py-3 text-xs font-bold text-center transition ${tab === 'shares' ? 'text-dusco border-b-2 border-dusco' : 'text-gray-500'}`}>Shares</button>
       </div>
 
       <div className="px-5 pt-4 pb-6">
@@ -88,14 +88,14 @@ export default function GroupDashboard() {
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="font-bold text-sm text-dark">{b.name}</h4>
-                          <span className="text-[10px] bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">Group</span>
+                          <span className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full">Group</span>
                         </div>
-                        {b.goalName && <p className="text-[10px] text-gray-400">{b.goalName}</p>}
+                        {b.goalName && <p className="text-[10px] text-gray-500">{b.goalName}</p>}
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-black text-dark tabular-nums">{formatTZS(b.balance)}</p>
-                      <p className="text-[10px] text-gray-400">{b.percentage}%</p>
+                      <p className="text-[10px] text-gray-500">{b.percentage}%</p>
                     </div>
                   </div>
                   {b.goalAmount && (
@@ -103,21 +103,21 @@ export default function GroupDashboard() {
                       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (b.balance / b.goalAmount) * 100)}%`, backgroundColor: b.balance >= b.goalAmount ? '#22C55E' : b.color }} />
                       </div>
-                      <p className="text-[10px] text-gray-400 mt-0.5">{formatTZS(b.balance)} / {formatTZS(b.goalAmount)}</p>
+                      <p className="text-[10px] text-gray-500 mt-0.5">{formatTZS(b.balance)} / {formatTZS(b.goalAmount)}</p>
                     </div>
                   )}
                 </div>
               ))}
             </div>
 
-            <h4 className="font-bold text-xs text-gray-400 mb-2">Recent Social Activity</h4>
+            <h4 className="font-bold text-xs text-gray-500 mb-2">Recent Social Activity</h4>
             <div className="space-y-2">
               {recentTransactions.filter(t => t.type !== 'share_contribution').slice(0, 8).map(t => (
                 <div key={t.id} className="flex items-center gap-2 bg-surface rounded-xl p-3 text-xs">
                   <span>{txnIcon[t.type] || '📝'}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-dark truncate">{t.description}</p>
-                    <p className="text-[10px] text-gray-400">{t.userName} · {formatDateTime(t.createdAt)}</p>
+                    <p className="text-[10px] text-gray-500">{t.userName} · {formatDateTime(t.createdAt)}</p>
                   </div>
                   <span className={`font-bold tabular-nums ${t.amount >= 0 ? 'text-success' : 'text-error'}`}>
                     {t.amount >= 0 ? '+' : ''}{formatTZS(t.amount)}
@@ -131,20 +131,20 @@ export default function GroupDashboard() {
         {tab === 'shares' && (
           <>
             <div className="bg-surface rounded-xl p-5 text-center mb-4 border border-gray-100">
-              <p className="text-xs text-gray-400">Total Shares Pool</p>
+              <p className="text-xs text-gray-500">Total Shares Pool</p>
               <p className="text-2xl font-black text-dark tabular-nums mt-1">{formatTZS(sharesTotal)}</p>
             </div>
 
-            <h4 className="font-bold text-xs text-gray-400 mb-2 uppercase tracking-wider">Member Contributions</h4>
+            <h4 className="font-bold text-xs text-gray-500 mb-2 uppercase tracking-wider">Member Contributions</h4>
             <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-              <div className="grid grid-cols-3 gap-2 px-4 py-2 bg-surface text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              <div className="grid grid-cols-3 gap-2 px-4 py-2 bg-surface text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                 <span>Member</span><span className="text-right">Total Shares</span><span className="text-right">Last</span>
               </div>
               {members.sort((a, b) => b.sharesTotal - a.sharesTotal).map((m, i) => (
                 <div key={m.id} className={`grid grid-cols-3 gap-2 px-4 py-3 text-xs ${i % 2 === 0 ? '' : 'bg-surface/50'}`}>
                   <span className="font-medium text-dark">{m.name}{m.role !== 'member' && <span className="text-[10px] text-dusco ml-1">({m.role})</span>}</span>
                   <span className="text-right font-bold tabular-nums">{formatTZS(m.sharesTotal)}</span>
-                  <span className="text-right text-gray-400">{m.lastContribution ? formatDate(m.lastContribution) : '—'}</span>
+                  <span className="text-right text-gray-500">{m.lastContribution ? formatDate(m.lastContribution) : '—'}</span>
                 </div>
               ))}
             </div>

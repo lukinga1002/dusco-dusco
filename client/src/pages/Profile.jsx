@@ -59,7 +59,7 @@ export default function Profile() {
           <span className="text-lg">✉️</span>
           <div className="flex-1">
             <p className="font-bold text-sm text-dark">Manage Bahashas</p>
-            <p className="text-[10px] text-gray-400">Edit names, percentages, lock settings</p>
+            <p className="text-[10px] text-gray-500">Edit names, percentages, lock settings</p>
           </div>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
         </Link>
@@ -69,7 +69,7 @@ export default function Profile() {
             <span className="text-lg">🔔</span>
             <div className="flex-1">
               <p className="font-bold text-sm text-dark">Notifications</p>
-              <p className="text-[10px] text-gray-400">Deposit alerts, withdrawal updates</p>
+              <p className="text-[10px] text-gray-500">Deposit alerts, withdrawal updates</p>
             </div>
             <div className="w-10 h-5 bg-success rounded-full relative">
               <div className="absolute right-0.5 top-0.5 w-4 h-4 bg-white rounded-full" />
@@ -82,7 +82,7 @@ export default function Profile() {
             <span className="text-lg">ℹ️</span>
             <div className="flex-1">
               <p className="font-bold text-sm text-dark">About Dusco</p>
-              <p className="text-[10px] text-gray-400">Version 1.0 — Built for Tanzania</p>
+              <p className="text-[10px] text-gray-500">Version 1.0 — Built for Tanzania</p>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
           </div>
@@ -91,7 +91,7 @@ export default function Profile() {
 
       {/* Account info */}
       <div className="px-5 mt-6">
-        <h3 className="font-bold text-xs text-gray-400 mb-2 uppercase tracking-wider">Account</h3>
+        <h3 className="font-bold text-xs text-gray-500 mb-2 uppercase tracking-wider">Account</h3>
         <div className="bg-surface rounded-xl p-4 space-y-2 text-xs">
           <div className="flex justify-between"><span className="text-gray-500">Phone</span><span className="font-medium">{user?.phone}</span></div>
           <div className="flex justify-between"><span className="text-gray-500">Dusco Number</span><span className="font-mono font-medium">{user?.duscoNumber}</span></div>

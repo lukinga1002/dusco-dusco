@@ -15,6 +15,12 @@ export default function Dashboard() {
   const [expandedCard, setExpandedCard] = useState(null);
   const [cardTxns, setCardTxns] = useState({});
   const [copied, setCopied] = useState(false);
+  const [sendToast, setSendToast] = useState(false);
+
+  const showSendSoon = () => {
+    setSendToast(true);
+    setTimeout(() => setSendToast(false), 2800);
+  };
 
   const loadData = async () => {
     try {
@@ -70,17 +76,29 @@ export default function Dashboard() {
       {/* Quick actions */}
       <div className="flex gap-3 px-5 -mt-5">
         <button onClick={() => setShowDeposit(true)}
-          className="flex-1 bg-white shadow-premium rounded-2xl py-3.5 text-center font-bold text-sm text-dusco hover:-translate-y-0.5 transition active:scale-[0.98]">
+          className="flex-1 bg-white shadow-premium rounded-2xl py-3.5 text-center font-bold text-sm text-dusco hover:-translate-y-0.5 transition active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-dusco focus-visible:ring-offset-2">
           💰 Add Money
         </button>
-        <button disabled className="flex-1 bg-white shadow-card rounded-2xl py-3.5 text-center font-bold text-sm text-gray-300 cursor-not-allowed" title="Coming Soon">
+        <button onClick={showSendSoon}
+          className="relative flex-1 bg-white shadow-card rounded-2xl py-3.5 text-center font-bold text-sm text-gray-400 transition active:scale-[0.98]">
           📤 Send
+          <span className="absolute top-1.5 right-2 text-[8px] font-black uppercase tracking-wide bg-gray-100 text-gray-400 px-1.5 py-0.5 rounded-full">Soon</span>
         </button>
       </div>
 
+      {/* Send-soon toast */}
+      <AnimatePresence>
+        {sendToast && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="mx-5 mt-3 bg-dark text-white text-xs rounded-xl px-4 py-2.5 text-center">
+            Send is coming soon — you'll be able to pay anyone straight from a bahasha.
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Bahasha cards */}
       <div className="px-5 mt-6">
-        <h3 className="font-bold text-sm text-gray-400 mb-3">Your Bahashas</h3>
+        <h3 className="font-bold text-sm text-gray-500 mb-3">Your Bahashas</h3>
         <div className="space-y-3">
           {walletData.bahashas.map(b => {
             const isExpanded = expandedCard === b.id;
@@ -93,16 +111,16 @@ export default function Dashboard() {
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-dark text-sm">{b.name}</h4>
                       {b.isLocked && <span className="text-xs">🔒</span>}
-                      <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">{b.percentage}%</span>
+                      <span className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">{b.percentage}%</span>
                     </div>
                     <p className="font-black text-dark tabular-nums mt-0.5">{formatTZS(b.balance)}</p>
-                    {b.goalName && <p className="text-[10px] text-gray-400 mt-0.5">{b.goalName}</p>}
+                    {b.goalName && <p className="text-[10px] text-gray-500 mt-0.5">{b.goalName}</p>}
                     {b.goalAmount && (
                       <div className="mt-1.5">
                         <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                           <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (b.balance / b.goalAmount) * 100)}%`, backgroundColor: b.balance >= b.goalAmount ? '#22C55E' : b.color }} />
                         </div>
-                        <p className="text-[10px] text-gray-400 mt-0.5 tabular-nums">
+                        <p className="text-[10px] text-gray-500 mt-0.5 tabular-nums">
                           {b.balance >= b.goalAmount ? '✓ Goal reached!' : `${formatTZS(b.balance)} / ${formatTZS(b.goalAmount)}`}
                         </p>
                       </div>
@@ -142,7 +160,7 @@ export default function Dashboard() {
 
       {/* Recent activity */}
       <div className="px-5 mt-6 pb-6">
-        <h3 className="font-bold text-sm text-gray-400 mb-3">Recent Activity</h3>
+        <h3 className="font-bold text-sm text-gray-500 mb-3">Recent Activity</h3>
         <div className="space-y-2">
           {transactions.length === 0 ? (
             <p className="text-center text-sm text-gray-300 py-6">No transactions yet</p>
@@ -151,7 +169,7 @@ export default function Dashboard() {
               <span className="text-lg">{txnIcon[t.type] || '📝'}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-dark truncate">{t.description}</p>
-                <p className="text-[10px] text-gray-400">{formatDateTime(t.createdAt)}{t.bahashaName ? ` · ${t.bahashaName}` : ''}</p>
+                <p className="text-[10px] text-gray-500">{formatDateTime(t.createdAt)}{t.bahashaName ? ` · ${t.bahashaName}` : ''}</p>
               </div>
               <span className={`text-sm font-bold tabular-nums ${t.amount >= 0 ? 'text-success' : 'text-error'}`}>
                 {t.amount >= 0 ? '+' : ''}{formatTZS(t.amount)}

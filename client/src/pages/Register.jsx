@@ -32,27 +32,27 @@ export default function Register() {
 
       <div className="flex-1 flex flex-col justify-center px-6 pb-12">
         <h1 className="text-2xl font-black text-dark mb-1">Create Account</h1>
-        <p className="text-sm text-gray-400 mb-8">Start saving with Dusco envelopes</p>
+        <p className="text-sm text-gray-500 mb-8">Start saving with Dusco envelopes</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1.5">Full Name</label>
-            <input type="text" value={form.name} onChange={e => update('name', e.target.value)} placeholder="Juma Hassan"
+            <label htmlFor="reg-name" className="block text-xs font-semibold text-gray-500 mb-1.5">Full Name</label>
+            <input id="reg-name" type="text" value={form.name} onChange={e => update('name', e.target.value)} placeholder="Juma Hassan"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm bg-surface" required />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1.5">Phone Number</label>
-            <input type="tel" value={form.phone} onChange={e => update('phone', e.target.value)} placeholder="07XXXXXXXX"
+            <label htmlFor="reg-phone" className="block text-xs font-semibold text-gray-500 mb-1.5">Phone Number</label>
+            <input id="reg-phone" type="tel" value={form.phone} onChange={e => update('phone', e.target.value)} placeholder="07XXXXXXXX"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm bg-surface" required />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1.5">Password</label>
-            <input type="password" value={form.password} onChange={e => update('password', e.target.value)} placeholder="Min 6 characters"
+            <label htmlFor="reg-password" className="block text-xs font-semibold text-gray-500 mb-1.5">Password</label>
+            <input id="reg-password" type="password" value={form.password} onChange={e => update('password', e.target.value)} placeholder="Min 6 characters"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm bg-surface" required />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1.5">Confirm Password</label>
-            <input type="password" value={form.confirm} onChange={e => update('confirm', e.target.value)} placeholder="Re-enter password"
+            <label htmlFor="reg-confirm" className="block text-xs font-semibold text-gray-500 mb-1.5">Confirm Password</label>
+            <input id="reg-confirm" type="password" value={form.confirm} onChange={e => update('confirm', e.target.value)} placeholder="Re-enter password"
               className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm bg-surface" required />
           </div>
           {error && <p className="text-error text-xs text-center">{error}</p>}
@@ -62,7 +62,7 @@ export default function Register() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-400 mt-6">
+        <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account? <Link to="/login" className="text-dusco font-semibold">Sign in</Link>
         </p>
       </div>

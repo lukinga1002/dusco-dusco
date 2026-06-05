@@ -13,7 +13,7 @@ export default function BottomNav() {
     <div className="bg-white border-t border-gray-100 flex shrink-0 safe-bottom">
       {tabs.map(t => (
         <NavLink key={t.to} to={t.to}
-          className={({ isActive }) => `flex-1 flex flex-col items-center py-2.5 text-[10px] font-medium transition ${isActive ? 'text-dusco' : 'text-gray-400'}`}>
+          className={({ isActive }) => `flex-1 flex flex-col items-center justify-center min-h-[52px] py-3 text-[10px] font-medium transition ${isActive ? 'text-dusco' : 'text-gray-500'}`}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d={t.icon} />
           </svg>

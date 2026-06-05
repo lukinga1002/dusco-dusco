@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const steps = [
@@ -22,6 +23,9 @@ const fees = [
 ];
 
 export default function Landing() {
+  // Pre-warm the backend so login is instant when the user signs in
+  useEffect(() => { fetch('/api/health').catch(() => {}); }, []);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Nav */}
@@ -44,7 +48,7 @@ export default function Landing() {
         <Link to="/register" className="inline-block mt-8 px-8 py-4 bg-dusco text-white font-bold text-lg rounded-xl hover:bg-dusco-dark transition shadow-lg shadow-dusco/20">
           Join Dusco — It's Free
         </Link>
-        <p className="mt-4 text-xs text-gray-400">No app download needed. Works on any phone browser.</p>
+        <p className="mt-4 text-xs text-gray-500">No app download needed. Works on any phone browser.</p>
       </section>
 
       {/* How It Works */}

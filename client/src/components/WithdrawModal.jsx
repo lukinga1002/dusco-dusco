@@ -44,7 +44,7 @@ export default function WithdrawModal({ bahasha, onClose, onSuccess }) {
         {!result ? (
           <div className="p-6">
             <h2 className="font-heading text-xl font-bold text-dark mb-1">Withdraw</h2>
-            <p className="text-sm text-gray-400 mb-6">
+            <p className="text-sm text-gray-500 mb-6">
               From <span className="font-medium text-dark">{bahasha.name}</span> · Balance: {formatTZS(bahasha.balance)}
             </p>
 
@@ -105,16 +105,16 @@ export default function WithdrawModal({ bahasha, onClose, onSuccess }) {
               <span className="text-4xl">{result.feeWaived ? '🎉' : '✅'}</span>
             </motion.div>
             <h2 className="font-heading text-xl font-bold text-dark mt-3">Withdrawal Sent</h2>
-            <p className="text-sm text-gray-400 mt-1">{formatTZS(result.amount)} to {result.destination}</p>
+            <p className="text-sm text-gray-500 mt-1">{formatTZS(result.amount)} to {result.destination}</p>
             {result.feeWaived && (
               <div className="bg-success/10 text-success text-xs font-medium rounded-full px-3 py-1 inline-block mt-2">
                 Fee waived — 90-day savings bonus!
               </div>
             )}
             {!result.feeWaived && result.withdrawalFee > 0 && (
-              <p className="text-xs text-gray-400 mt-1">Fee: {formatTZS(result.withdrawalFee)}</p>
+              <p className="text-xs text-gray-500 mt-1">Fee: {formatTZS(result.withdrawalFee)}</p>
             )}
-            <p className="text-xs text-gray-400 mt-2">Remaining in {result.bahashaName}: {formatTZS(result.remainingBalance)}</p>
+            <p className="text-xs text-gray-500 mt-2">Remaining in {result.bahashaName}: {formatTZS(result.remainingBalance)}</p>
             <button onClick={() => { onSuccess(); onClose(); }}
               className="w-full py-3.5 bg-dusco text-white font-heading font-semibold rounded-2xl mt-6 hover:bg-dusco-dark transition">
               Done
