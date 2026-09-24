@@ -55,8 +55,27 @@ consent of" the data subject. Dusco processes financial-transaction data.
   moves on. No consent is kept in browser storage any more.
 - **Still open:** (a) consent is **optional** on register for backwards compatibility with
   the older `client/` — make it **mandatory** before the live pilot; (b) withdrawal of
-  `service_operation` is recorded but must be wired to an account-closure flow, since the
-  service cannot lawfully continue without it (depends on the deletion endpoint below).
+  `service_operation` is recorded but does not yet *trigger* closure — the deletion flow
+  now exists, so this is a matter of linking the two.
+
+**Erasure / right to be forgotten — *addressed 2026-09-24***
+- Implemented as **anonymisation, not deletion** (`server/services/account.js`,
+  `server/db/migrations/002_user_deleted_at.sql`). Dusco is a financial service: the
+  transaction ledger supports reconciliation, disputes and AML record-keeping, and a hard
+  `DELETE` would cascade it away. Closing an account scrubs name, phone, Dusco number and
+  credentials, deletes notifications and group memberships, sets `deleted_at`, and retains
+  the ledger unlinked from any person.
+- **Money is never destroyed.** Closure is refused while the person holds a bahasha
+  balance, a locked bahasha with funds, a group shares claim, or sole adminship of a live
+  group — erasing the account would erase the record of what they are owed.
+- Requires the current password **and** a typed `DELETE`. `GET /api/account/deletion-preview`
+  discloses what is erased vs retained before confirming; the UI mirrors it
+  (`client-v2/.../DeleteAccount.jsx`).
+- Closed accounts cannot log in, and `authenticateToken` now re-checks the account on every
+  request — previously a token issued before closure stayed valid for up to 7 days.
+- **Still open:** the **7-year retention period is a placeholder** — confirm the applicable
+  financial record-keeping obligation with Tanzanian counsel; and *access/portability*
+  ("Download my data") is still unbuilt.
 
 **R2 — Operating without registration as a data controller/processor (s.14–16, s.19)**
 Controllers/processors must register with the PDPC (5-year registration); operating
