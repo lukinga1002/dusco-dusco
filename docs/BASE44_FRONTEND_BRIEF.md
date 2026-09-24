@@ -98,7 +98,10 @@ Phone format is Tanzanian local, e.g. `0712345678`.
 | POST | `/transactions/deposit` | `{amount, sourceNetwork, senderPhone?, external?}` | `{message, grossAmount, crossNetworkFee, netAmount, sourceNetwork, senderPhone, external, transactionId, splits:[{bahashaId, bahashaName, percentage, amount, color}]}` |
 | POST | `/transactions/withdraw` | `{bahashaId, amount, destinationPhone, destinationNetwork}` | `{message, amount, netSent, withdrawalFee, feeWaived, destination, bahashaName, remainingBalance, transactionId}` |
 | GET | `/transactions` | `?limit=&offset=&type=&bahashaId=&startDate=&endDate=` | `{total, transactions:[{id, bahashaName, type, amount, fee, sourceNetwork, destination, description, createdAt}]}` |
-| GET | `/transactions/fee-preview` | `?bahashaId=&amount=` | `{fee, feeWaived, feeWaivedReason}` |
+| GET | `/transactions/fee-preview` | `?type=withdrawal&bahashaId=&amount=` (or `?type=deposit&sourceNetwork=&amount=`) | withdrawal: `{fee, feeWaived, feeWaivedReason}` · deposit: `{fee, feeWaived, netAmount}` |
+
+> `type` is **required** — it must be `deposit` or `withdrawal`, or the endpoint returns
+> HTTP 400 `{"error":"Type must be deposit or withdrawal"}`.
 
 Transaction `type` values: `deposit`, `withdrawal`, `fee`, `dividend`, `transfer`, `penalty`.
 
