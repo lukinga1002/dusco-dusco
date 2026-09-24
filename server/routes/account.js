@@ -1,6 +1,6 @@
 const express = require('express');
 const { authenticateToken } = require('../middleware/auth');
-const { getDeletionPreview, deleteAccount } = require('../services/account');
+const { getDeletionPreview, deleteAccount, exportAccountData } = require('../services/account');
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -12,6 +12,23 @@ router.get('/deletion-preview', async (req, res) => {
   try {
     res.json(await getDeletionPreview(req.userId));
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// POST /api/account/export — the person's own data as structured JSON
+// (right of access / portability). POST rather than GET because it takes the
+// password in the body, and so it is never cached or left in a URL.
+router.post('/export', async (req, res) => {
+  try {
+    const { password } = req.body || {};
+    const data = await exportAccountData(req.userId, password);
+    const stamp = new Date().toISOString().slice(0, 10);
+    res.setHeader('Content-Disposition', `attachment; filename="dusco-my-data-${stamp}.json"`);
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    res.send(JSON.stringify(data, null, 2));
+  } catch (err) {
+    res.status(err.statusCode || 500).json({ error: err.message });
+  }
 });
 
 // DELETE /api/account — irreversible. Requires the current password.
