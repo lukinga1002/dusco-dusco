@@ -85,6 +85,11 @@ router.post('/login', async (req, res) => {
     if (!user || !bcrypt.compareSync(password, user.password_hash)) {
       return res.status(401).json({ error: 'Invalid phone number or password' });
     }
+    // A closed account keeps its row (the ledger is retained against it) but
+    // must not be able to sign in again.
+    if (user.deleted_at) {
+      return res.status(403).json({ error: 'This account has been closed.' });
+    }
 
     const token = generateToken(user.id);
     res.json({ token, user: { id: user.id, phone: user.phone, name: user.name, duscoNumber: user.dusco_number, isVerified: user.is_verified } });
