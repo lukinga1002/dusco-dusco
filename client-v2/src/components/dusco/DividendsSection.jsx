@@ -13,8 +13,20 @@ export default function DividendsSection() {
   const projection = useQuery({ queryKey: [...prefix, "dividends-projection"], queryFn: () => api.dividendProjection(), retry: false, staleTime: 60000 });
   const history = useQuery({ queryKey: [...prefix, "dividends-history"], queryFn: () => api.dividendHistory(), retry: false, staleTime: 60000 });
   const format = (key, value) => {
-    if (/rate|yield|percent/i.test(key)) return `${Number(value) >= 0 && Number(value) <= 1 ? Number(value) * 100 : Number(value)}%`;
-    if (/amount|balance|dividend|earning|projected/i.test(key)) return formatTZS(value);
+    if (/rate|yield|percent/i.test(key)) {
+      // The API already returns some rates pre-formatted (e.g. "8%") — pass those
+      // straight through instead of coercing them to NaN.
+      if (typeof value === "string" && value.trim().endsWith("%")) return value.trim();
+      const n = Number(value);
+      if (!Number.isFinite(n)) return String(value);
+      return `${n >= 0 && n <= 1 ? n * 100 : n}%`;
+    }
+    // `return` is matched after the rate branch above, so annualReturnRate
+    // ("8%") is still handled as a percentage rather than a currency amount.
+    if (/amount|balance|dividend|earning|projected|return|payout/i.test(key)) {
+      const n = Number(value);
+      return Number.isFinite(n) ? formatTZS(n) : String(value);
+    }
     if (/date|period|since|at$/i.test(key)) return formatDate(value);
     return String(value);
   };

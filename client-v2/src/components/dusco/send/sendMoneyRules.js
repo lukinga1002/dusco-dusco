@@ -23,7 +23,8 @@ export function destinationError(form) {
 }
 
 export async function fetchSendFee({ bahashaId, amount }) {
-  const result = await api.feePreview({ bahashaId, amount });
+  // `type` is required by the backend; without it the endpoint returns 400.
+  const result = await api.feePreview({ type: "withdrawal", bahashaId, amount });
   const fee = Number(result.fee);
   if (result.fee === null || result.fee === undefined || result.fee === "" || !Number.isFinite(fee) || fee < 0 || (result.feeWaived === true && fee !== 0)) throw new Error("Dusco could not confirm the fee. Refresh the preview before sending.");
   return { ...result, fee, feeWaived: result.feeWaived === true };
