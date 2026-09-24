@@ -74,8 +74,23 @@ consent of" the data subject. Dusco processes financial-transaction data.
 - Closed accounts cannot log in, and `authenticateToken` now re-checks the account on every
   request — previously a token issued before closure stayed valid for up to 7 days.
 - **Still open:** the **7-year retention period is a placeholder** — confirm the applicable
-  financial record-keeping obligation with Tanzanian counsel; and *access/portability*
-  ("Download my data") is still unbuilt.
+  financial record-keeping obligation with Tanzanian counsel.
+
+**Access & portability — *addressed 2026-09-24***
+- `POST /api/account/export` returns everything held about the person as structured JSON
+  (`server/services/account.js` → `exportAccountData`): profile, bahashas, full transaction
+  history, dividends, notifications, consent history, and their own slice of each group.
+- **Scoped to one data subject.** Group records are shared, so only the requester's role,
+  share contributions and group transactions are included. Other members' names, phone
+  numbers, balances and contributions are excluded — one person's access request must not
+  become a channel for extracting data about everyone they save with. Verified against the
+  demo group: none of its three other members appear in the output.
+- Carries a `notIncluded` list so the person is told what was withheld and why.
+- Requires the current password; POST keeps it out of URLs and logs; response is sent
+  `no-store` as a named attachment, and the client saves it from a Blob rather than
+  following a shareable URL.
+- **Still open:** *rectification* beyond changing your name, and a route for exercising
+  these rights when the person can no longer sign in.
 
 **R2 — Operating without registration as a data controller/processor (s.14–16, s.19)**
 Controllers/processors must register with the PDPC (5-year registration); operating
