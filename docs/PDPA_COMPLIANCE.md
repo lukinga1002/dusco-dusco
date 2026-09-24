@@ -27,15 +27,33 @@ Act apply across almost the whole app.
 
 ### CRITICAL
 
-**R1 — Processing sensitive data without consent (s.30, principle 5(a))**
+**R1 — Processing sensitive data without consent (s.30, principle 5(a))** — *partially
+addressed 2026-09-24*
 The Act prohibits processing sensitive personal data "without obtaining prior written
-consent of" the data subject. Dusco processes financial-transaction data but captures
-**no consent** at sign-up.
+consent of" the data subject. Dusco processes financial-transaction data.
 - **Mitigation:** Add an explicit, unbundled **consent step in registration** ("I consent
   to Dusco processing my financial-transaction data to operate my savings envelopes")
-  with a linked Privacy Notice; store consent (version, timestamp, IP) per user; block
+  with a linked Privacy Notice; store consent (version, timestamp) per user; block
   onboarding until given; allow withdrawal of consent. Treat consent as a first-class
   record in the DB (`consents` table).
+- **Done:** the `consents` table exists as an **append-only audit log**
+  (`server/db/migrations/001_consents.sql`) — every grant and withdrawal inserts a new
+  row, so consent history is reconstructable and nothing is overwritten. Recorded per
+  purpose (`service_operation`, `marketing`) with the policy version in force, the
+  capture source, and a timestamp. Served by `server/services/consent.js` and
+  `server/routes/consent.js`: `GET /api/consent/purposes` (public),
+  `GET /api/consent`, `GET /api/consent/history`, `POST /api/consent`.
+  `POST /api/auth/register` accepts `consents` and validates them *before* creating the
+  account, rolling the account back if the consent write fails. `ON DELETE CASCADE`
+  means erasing an account also erases its consent history.
+- **Deliberately not stored:** IP address and user agent. They would strengthen evidence
+  of consent but are additional personal data; the privacy-protective default was taken.
+  Add them only if counsel requires stronger proof.
+- **Still open:** (a) consent is **optional** on register for backwards compatibility with
+  the older client — make it **mandatory** before the live pilot; (b) the new client-v2 UI
+  must call these endpoints instead of keeping consent in `localStorage`; (c) withdrawal
+  of `service_operation` must be wired to an account-closure flow, since the service
+  cannot lawfully continue without it.
 
 **R2 — Operating without registration as a data controller/processor (s.14–16, s.19)**
 Controllers/processors must register with the PDPC (5-year registration); operating
