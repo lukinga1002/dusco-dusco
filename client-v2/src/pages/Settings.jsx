@@ -8,6 +8,7 @@ import { useDuscoAuth } from "@/lib/DuscoAuthContext";
 import { api } from "@/lib/duscoApi";
 import QueryFeedback from "@/components/dusco/QueryFeedback";
 import ConsentSettings from "@/components/dusco/ConsentSettings";
+import DownloadMyData from "@/components/dusco/DownloadMyData";
 import DeleteAccount from "@/components/dusco/DeleteAccount";
 import { formatDate } from "@/lib/duscoFormat";
 
@@ -68,10 +69,7 @@ export default function Settings() {
       <section className="space-y-3 rounded-2xl border bg-card p-5">
         <h2 className="font-display text-lg font-semibold">Your data rights</h2>
         <p className="text-sm text-muted-foreground">Under the Personal Data Protection Act (Cap. 44, 2023) you can request a copy of your data, corrections, or deletion of your account.</p>
-        <div className="flex flex-wrap gap-2">
-          <Button variant="outline" className="min-h-11" disabled title="Pending backend support">Download my data</Button>
-        </div>
-        <p className="text-xs text-muted-foreground">Downloading a copy of your data is still pending backend support. Until then, contact us through the app and we'll handle your request.</p>
+        <DownloadMyData />
         <DeleteAccount />
         <div className="flex flex-wrap gap-4 pt-1 text-sm">
           <Link to="/privacy" className="inline-flex min-h-11 items-center gap-1.5 font-medium text-primary"><ShieldCheck className="h-4 w-4" />Privacy Notice</Link>
