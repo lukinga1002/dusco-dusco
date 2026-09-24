@@ -20,13 +20,15 @@ export default function AddMoney() {
     <Link to="/app" className="inline-flex min-h-11 items-center gap-2 text-sm text-muted-foreground"><ArrowLeft className="h-4 w-4" />Dashboard</Link>
     <header><h1 className="font-display text-3xl font-semibold">Add Money</h1><p className="mt-2 text-sm text-muted-foreground">One incoming deposit. Automatically shared across your savings.</p></header>
     <p className="rounded-xl bg-dusco-gold-soft px-4 py-3 text-sm text-foreground">Demo environment · All money movement is simulated.</p>
-    <Tabs defaultValue="simulate">
-      <TabsList className="mb-5 grid h-auto w-full grid-cols-2"><TabsTrigger value="simulate" className="min-h-11" disabled={operation.isPending || operation.uncertain}>Simulate deposit</TabsTrigger><TabsTrigger value="receive" className="min-h-11" disabled={operation.isPending || operation.uncertain}>Receive money</TabsTrigger></TabsList>
-      <TabsContent value="simulate">
-        {!wallets.data ? <QueryFeedback error={wallets.error} onRetry={wallets.refetch} label="Loading your deposit split…" /> : <DepositFlow wallets={wallets.data.bahashas || []} operation={operation} loadError={wallets.error} onRetry={wallets.refetch} />}
-      </TabsContent>
+    {/* "Receive money" leads: it is how the product actually works. The
+        simulator is the demo aid and sits second. */}
+    <Tabs defaultValue="receive">
+      <TabsList className="mb-5 grid h-auto w-full grid-cols-2"><TabsTrigger value="receive" className="min-h-11" disabled={operation.isPending || operation.uncertain}>Receive money</TabsTrigger><TabsTrigger value="simulate" className="min-h-11" disabled={operation.isPending || operation.uncertain}>Simulate deposit</TabsTrigger></TabsList>
       <TabsContent value="receive" className="space-y-4">
         {profile.isPending && !user?.duscoNumber ? <QueryFeedback label="Loading your receiving number…" /> : <>{profile.isError && <QueryFeedback error={profile.error} onRetry={profile.refetch} />}<ReceiveMoney user={profile.data || user} /></>}
+      </TabsContent>
+      <TabsContent value="simulate">
+        {!wallets.data ? <QueryFeedback error={wallets.error} onRetry={wallets.refetch} label="Loading your deposit split…" /> : <DepositFlow wallets={wallets.data.bahashas || []} operation={operation} loadError={wallets.error} onRetry={wallets.refetch} />}
       </TabsContent>
     </Tabs>
   </div>;
