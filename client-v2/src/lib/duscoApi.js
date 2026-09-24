@@ -130,6 +130,10 @@ export const api = {
   consentHistory: () => request("/consent/history"),
   recordConsent: (body) => request("/consent", { method: "POST", body }),
 
+  // ---- Account erasure (PDPA right to erasure) ----
+  deletionPreview: () => request("/account/deletion-preview"),
+  deleteAccount: (body) => request("/account", { method: "DELETE", body }),
+
   // ---- Notifications ----
   getNotifications: () => request("/notifications"),
   markNotificationRead: (id) => request(`/notifications/${id}/read`, { method: "PUT" }),
