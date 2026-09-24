@@ -1,7 +1,7 @@
-# Dusco — Business Plan & Partnership Case
+# Dusco — Partnership Pack & Commercial Case
 
 **Prepared for:** GCA Pay
-**Prepared by:** The Dusco team
+**Prepared by:** Larson Consulting (Dusco)
 **Date:** July 2026
 **Status:** Confidential — for partnership discussion
 
@@ -9,193 +9,344 @@
 
 ## A note on how to read this document
 
-This is written for a payments partner, not an equity investor, so it leads with the thing
-that matters to you: **the volume Dusco will move across your rails, and how fast**. We are
-not raising money in this document. We are asking to build.
+This is a partnership pack for a payments partner, not an equity fundraise. We are asking to
+integrate, not to raise money. Its purpose is narrow and practical: to secure sandbox
+credentials, confirm that Dusco's account-reference model is technically supported on your
+rails, agree commercial terms, and move to a controlled live pilot.
 
-Every number in the projections rests on an assumption, and every assumption is stated
-plainly in one place (Section 8) so you can challenge it or replace it with your own. Where
-we don't yet have a real figure — your per-transaction rate, our final unit costs — we've
-said so rather than dress a guess up as a fact. Two figures in particular we'd like to set
-*with* you: the processing rate you'd charge Dusco, and the settlement timing. Those change
-the model materially and they're yours to give.
+We have written it to be checked, not admired. Every projection rests on an assumption, and
+every assumption is stated in one place (Section 9) so you can challenge it or replace it with
+your own figures. Where we do not yet have a verified number — your per-transaction rate, our
+final unit costs — we say so rather than present a guess as a fact. Market figures (Section 8)
+are drawn from Bank of Tanzania, TCRA, and FinScope Tanzania sources as reported and should be
+re-confirmed against the primary publications before wider external circulation.
 
----
+Two things are important to state at the outset, because they frame everything below:
 
-## 1. The short version
-
-Tanzanians already save in envelopes. Walk into most households and you'll find money
-divided by purpose — school fees here, the farm there, a little for emergencies, some kept
-back for a wedding or a funeral. The tool is a physical envelope, a *bahasha*, and the
-discipline is real. What's missing is a digital version that respects that habit instead of
-flattening it into a single balance.
-
-Dusco is that digital version. A user gets one **Dusco number**. Money sent to it — from any
-network or bank — splits automatically across savings envelopes the user defined. No logging
-in, no manual transfers, no thinking about it. The same idea extends to savings groups
-(*chama* / VICOBA), which already move enormous sums informally.
-
-For GCA Pay, Dusco is a **demand engine for payment volume**: many small collections coming
-in, regular disbursements going out, and — as groups adopt it — bulk flows on a schedule.
-Every one of those transactions is a collection or a payout you process. Dusco handles the
-savings logic and the customer; you move the money.
-
-**The product is already built and deployed.** The integration layer against your API is
-written and tested — we are at the point of plugging in sandbox keys, not designing on a
-whiteboard.
+1. **Dusco does not intend to hold customer funds.** The operating model is designed so that
+   customer money is held by a licensed bank or an appropriately regulated financial
+   institution. Dusco provides the technology, rules engine, and customer experience — not
+   deposit-taking. Section 2 sets out the structure in full.
+2. **Dusco has not yet been used by real customers.** There are ten individual pilot users and
+   one *kikoba* (savings group) in the onboarding pipeline. Nothing in this document should be
+   read as claiming live traction. Where we describe a feature as built, Section 6 and the
+   accompanying technical validation checklist state precisely what has been verified in the
+   codebase and what has not.
 
 ---
 
-## 2. The problem we're solving
+## 1. Executive summary
+
+Tanzanians already save in envelopes — money divided by purpose: school fees, farm inputs,
+emergencies, a wedding or a funeral. The habit is real and durable. What is missing is a
+digital version that respects it instead of collapsing it into a single balance.
+
+Dusco is that digital version, built and operated by **Larson Consulting**, a fully
+registered company. A user is issued one **Dusco number**. Money sent to that number is
+intended to split automatically across savings envelopes (*bahasha*) the user has defined. The
+same model extends to savings groups (*kikoba* / *chama* / VICOBA), which already move large
+sums informally on paper ledgers and cash boxes.
+
+For GCA Pay, Dusco is a source of payment volume: many small collections in, regular
+disbursements out, and — as groups adopt it — scheduled bulk flows. Dusco handles the savings
+logic, the customer relationship, the rules engine, and the ledger visibility. GCA Pay
+provides collections, disbursements, routing, and reconciliation support. A licensed bank or
+regulated financial institution holds the funds.
+
+**The commercial reality we put on the table honestly:** at a placeholder processing rate of
+0.6%, transaction fees alone do not carry the business (Section 11 shows the arithmetic).
+That is a statement about the *rate*, not the idea — which is exactly why we are asking for a
+partnership rate rather than a standard price card. We ask GCA Pay to help make Dusco's
+transaction line at least neutral at low volume and stronger with scale. Float yield is treated
+as upside, conditional on licensing and a compliant bank structure — never as the foundation
+of the model.
+
+What we are asking for is set out in full in Section 13.
+
+---
+
+## 2. Operating and regulatory structure
+
+Dusco will operate as the product, technology, and customer-experience layer under Larson
+Consulting, a fully registered company. **Dusco does not intend to operate as an unlicensed
+deposit-taking institution.** The operating model is designed so that customer funds are held
+by a licensed bank or appropriately regulated financial institution, while Dusco provides the
+digital envelope infrastructure, customer interface, rules engine, transaction logic, ledger
+visibility, and group-management tools.
+
+We set out the three roles explicitly so that regulatory responsibility is unambiguous:
+
+**Larson Consulting / Dusco — the technology and experience layer.**
+- Product, user experience, and mobile/web application.
+- Savings-envelope logic, user-defined split percentages, goals, and locks.
+- Group ledgering: member contributions, group envelopes, and a member contribution/share
+  ledger for internal group accounting.
+- Rules engine and fee display; the reconciliation interface and transaction ledger visible
+  to users and to Dusco operations.
+- Customer onboarding, support, consent capture, privacy notice, and data-subject rights.
+- Dusco records positions and instructions; it does not, in this design, take custody of funds.
+
+**GCA Pay — the payment and settlement-support layer.**
+- Collections from, and disbursements to, mobile-money networks and banks.
+- Payment routing, references or virtual-account logic that let each Dusco user and group be
+  addressed uniquely on the way in.
+- Settlement support and reconciliation reporting.
+- Failed-transaction, reversal, and limit handling on the payment rails.
+
+**Licensed bank / regulated financial institution — the funds-holding layer.**
+- Custody of pooled customer funds in an appropriately structured account (for example, a
+  trust, custody, or settlement account) held for the benefit of users.
+- The regulated relationship through which any float or yield arrangement — if pursued — would
+  be structured and approved.
+
+**Regulatory posture.** We take the following as design constraints, not afterthoughts:
+
+- **Bank of Tanzania licensing and funds custody.** Customer funds are to be held by a licensed
+  institution under an appropriate account structure. Any float or yield arrangement is
+  conditional on the correct licensing and bank structure and is not booked as base revenue.
+- **KYC / AML.** Customer identity verification and transaction monitoring are to be performed
+  in line with the requirements of the licensed funds-holding partner and applicable
+  Bank of Tanzania and FIU guidance. Dusco will align its onboarding to those requirements; we
+  ask GCA Pay to confirm which KYC obligations sit with the payment layer.
+- **Data protection (PDPA, Cap. 44).** Financial-transaction data should be treated as
+  high-risk personal data. Dusco will design for lawful basis, recorded consent, data
+  minimisation, security, retention limits, and data-subject rights, and will agree a Data
+  Processing Agreement with GCA Pay before live processing. A gap assessment exists
+  (`docs/PDPA_COMPLIANCE.md`); the open items are listed honestly in Section 6.
+  Final classification under the Act is subject to Tanzanian data-protection counsel.
+- **Settlement and reconciliation.** Settlement timing, settlement-account structure, and
+  reconciliation reporting are to be defined jointly with GCA Pay and the bank partner.
+
+We would value GCA Pay's guidance in defining the compliant funds-holding structure — this is
+a place where your experience with licensed institutions materially de-risks our path.
+
+---
+
+## 3. The problem we are solving
 
 Three things are true at once in Tanzania, and together they make the opportunity:
 
 1. **People save by purpose, not by pool.** The envelope habit is cultural and durable.
-   Banking apps and mobile-money wallets give you one balance; they don't match how people
-   actually think about their money.
-2. **Money is fragmented across networks.** M-Pesa, Mixx by Yas, Airtel Money, HaloPesa and
-   the banks don't talk to each other cleanly, and moving between them costs the user time
-   and fees. A saver receiving money from three different senders on three networks has three
-   headaches.
-3. **Group saving is huge but informal.** Hundreds of thousands of chamas and VICOBA groups
-   run on paper ledgers, cash boxes, and trust. When that breaks, it breaks badly.
+   Wallets and banking apps give one balance; they do not match how people think about money.
+2. **Money is fragmented across networks.** M-Pesa, Mixx by Yas, Airtel Money, HaloPesa, and
+   the banks do not interoperate cleanly, and moving between them costs the user time and fees.
+3. **Group saving is large but informal.** Very large numbers of *kikoba* / VICOBA groups run
+   on paper ledgers, cash boxes, and trust. When that breaks, it breaks badly.
 
-Dusco doesn't ask people to change their behaviour. It digitises the behaviour they already
-have — and it needs a payments partner who can reach every network and bank to do it. That's
-the whole reason this conversation exists.
+Dusco does not ask people to change their behaviour. It digitises the behaviour they already
+have — and it needs a payments partner who can reach every network and bank to do it.
 
 ---
 
-## 3. What Dusco does (briefly)
+## 4. What Dusco does
 
-- **One Dusco number, automatic splitting.** Money arriving at a user's Dusco number is split
-  across their envelopes by percentages they set. 100,000 TZS in, and it lands as (say) 40k
-  savings / 30k school fees / 20k travel / 10k personal — instantly.
-- **Receive from anywhere.** The headline feature depends on you: a user can be paid to their
-  Dusco number from any bank or wallet, and it just works.
-- **Goals and locks.** Users can set a target on an envelope and watch progress, or lock an
-  envelope until a date to protect it from themselves.
-- **Groups (chama / VICOBA).** A group gets its own Dusco number. Member contributions split
-  into group envelopes (events, emergencies, opportunities), with a shares ledger tracked
-  separately — the digital version of the cash box, minus the risk.
-- **Privacy by default.** Balances are hidden until the user chooses to reveal them — a small
-  thing that matters a lot in shared spaces.
+- **One Dusco number, automatic splitting.** Money arriving at a user's Dusco number is
+  intended to split across their envelopes by percentages they set — e.g. 100,000 TZS in lands
+  as 40k savings / 30k school fees / 20k travel / 10k personal.
+- **Receive from any network or bank.** This is the headline capability and it depends on GCA
+  Pay: a user is paid to their Dusco number from any wallet or bank via the account-reference
+  model. In the current build this inbound flow is *simulated* pending your confirmation and
+  sandbox access (see Section 6).
+- **Goals and locks.** Users can set a target on an envelope and track progress, or lock an
+  envelope until a date.
+- **Groups (*kikoba* / VICOBA).** A group gets its own Dusco number; member contributions
+  split into group envelopes, with a member contribution/share ledger for internal group
+  accounting tracked separately — the digital version of the cash box, minus the risk. These
+  records are for group accounting and contribution tracking only; they do not represent
+  securities or investment products unless reviewed and approved under the applicable legal
+  structure.
+- **Privacy by default.** Balances are hidden until the user chooses to reveal them.
 
-The experience is live and demonstrable today.
+Section 6 states precisely which of these are built and verified, which are partial, and which
+depend on GCA Pay.
 
 ---
 
-## 4. Why this is a good partnership for GCA Pay
+## 5. Pilot-first go-to-market
 
-This is not a vendor relationship where you sell us an API and walk away. The incentives line
-up:
+We are deliberately starting narrow and controlled. The purpose of the first phase is not
+growth — it is to validate user behaviour, payment reliability, fee acceptance, reconciliation
+accuracy, and group adoption before spending on scale. Broad launch language has no place until
+the payment loop is proven on real rails.
+
+**Phase 1 — Controlled pilot (validate the loop).**
+Ten individual pilot users and one *kikoba* group, all already in the onboarding pipeline. The
+objective is to prove, on live rails, that money reaches the right Dusco number, splits
+correctly, reconciles cleanly, that fees are understood and accepted, that withdrawals behave
+as designed, and that a group can run its contributions through Dusco. Onboarding is direct and
+low-cost (founder-led), not paid acquisition.
+
+**Phase 2 — Dense community launch (after the loop is proven).**
+Only once Phase 1 KPIs are met, launch densely in one urban area (Dar es Salaam first),
+acquiring through referral — the product is inherently shareable because a user shares their
+Dusco number to receive money.
+
+**Phase 3 — Group-led scale.**
+Grow through organised groups: *kikoba* / VICOBA / *chama*, SACCOS, religious groups, alumni
+groups, workplace welfare groups, and community organisers. Each group brings many members at
+once and a higher, scheduled deposit frequency; the group treasurer does the selling.
+
+**Phase 4 — Embed at the source.**
+Employer, cooperative, and payroll / source-of-income integration, so saving happens before
+spending. This is the highest-quality volume — regular, large, and sticky.
+
+**Pilot KPIs (the gate to Phase 2).** We will measure and report:
+
+- activated users (completed onboarding and first login);
+- first-deposit conversion rate;
+- repeat-deposit rate within 30 days;
+- average monthly deposit per active user;
+- number of successful deposits;
+- number of failed transactions;
+- settlement / reconciliation accuracy;
+- fee acceptance (deposits and withdrawals completed after the fee is shown);
+- withdrawal behaviour (timing, size, and use of the 90-day waiver);
+- group contribution compliance (members contributing on schedule);
+- customer-support issues (volume and type);
+- user trust and referral behaviour (referrals generated per active user).
+
+**Pilot pass criteria.** Dusco will not move to Phase 2 unless the pilot meets minimum
+operational gates: all settled transactions reconcile to the Dusco ledger; no unresolved
+customer-money incident remains open; at least one full *kikoba* contribution cycle is
+completed; at least 70% of individual pilot users complete a first deposit; at least 50% of
+depositing users make a repeat deposit within 30 days; users proceed with deposits after fee
+disclosure; and GCA Pay confirms that account references, settlement reports, failure states,
+and reversal processes are operationally workable.
+
+---
+
+## 6. What is actually built today
+
+We are strict about this because a payments partner will and should check. The full
+feature-by-feature technical validation is provided as a companion checklist; the summary:
+
+**Built and verified in the codebase (application layer, tested against a mock payment harness):**
+- One Dusco number per user, and one per group.
+- Automatic splitting of an incoming amount across envelopes by user-defined percentages.
+- Envelope goals and progress; envelope locking until a date; group envelopes; group member
+  contribution tracking and a member contribution/share ledger for internal group accounting.
+- Fee display before a transaction is confirmed.
+- Cross-network deposit-fee logic (1%, minimum TZS 500; free on the settlement network).
+- Withdrawal-fee logic (1%, floor TZS 500, cap TZS 5,000) **and the 90-day fee waiver** —
+  confirmed present in the code (`server/routes/transactions.js`), based on the age of the
+  earliest funds held in the envelope.
+- Privacy-by-default balance hiding.
+- GCA Pay adapter and a signature-verified, idempotent webhook endpoint — built and tested
+  **against a mock harness only**; they have not processed a live transaction.
+- Group role controls (admin / treasurer / member) enforced for group withdrawals.
+
+**Simulated pending GCA Pay (built as logic, not yet live):**
+- Receiving money from any network or bank to a Dusco number. The split logic is built and the
+  webhook is ready; live inbound depends on GCA Pay confirming the account-reference model and
+  issuing sandbox access.
+- Real disbursements to mobile money / banks (logic built; live payout depends on GCA Pay).
+
+**Partially built:**
+- Deposit reconciliation (transaction ledger, payment references, and webhook idempotency
+  exist; a formal reconciliation report/interface does not yet).
+- Failed-transaction and settlement-status handling (status fields and webhook-driven status
+  updates exist; user-facing retry and a reconciliation view do not yet).
+- Admin dashboard (an operational dashboard exists; it is not yet a full reconciliation tool,
+  and admin access is a single credential rather than proper role-based access control).
+
+**Business-rule / concept only (not built):**
+- User consent capture flow and a published privacy notice (a placeholder link only).
+- Transaction reversal handling (a status value exists in the schema; no reversal logic).
+
+**Pre-pilot security hardening:**
+Pre-pilot security hardening items have been identified and are scheduled before any live
+customer funds are processed. These include production-grade access control, secrets
+management, OTP replacement, database security configuration, rate-limiting, and audit logging.
+The detailed technical readiness checklist can be shared with GCA Pay's technical team during
+sandbox review.
+
+Nothing in this document is described as "live", "in production", or "processing real money".
+The product is a working build deployed for demonstration and a pilot, integrated against a
+mock payment harness, awaiting your sandbox.
+
+---
+
+## 7. Why this is a good partnership for GCA Pay
 
 - **We generate the transactions you monetise.** Dusco's core loop *is* payments — collect,
-  split, disburse. Our growth is your volume growth, one-to-one.
-- **We spread across all your rails.** Because Dusco receives from any network, we don't
-  concentrate on one channel. We bring you cross-network traffic, which is exactly the traffic
-  a single wallet can't.
-- **We bring recurring, predictable flow.** Savings and group contributions are periodic by
-  nature — salary cycles, weekly chama meetings. That's a steadier volume profile than
-  one-off commerce.
-- **We're low-integration-risk.** The adapter is built and the webhook is live and tested.
-  Going from sandbox to production is a matter of credentials and confirming field names — not
-  a rebuild.
-
-What we need from you is the collections and disbursements infrastructure across networks and
-banks, sandbox access to finish testing, and a processing rate that lets the unit economics
-work for both sides.
+  split, disburse. Our growth is your volume growth.
+- **We spread across all your rails.** Because Dusco is designed to receive from any network, we
+  bring cross-network traffic rather than concentrating on one channel.
+- **We bring recurring, predictable flow.** Savings and group contributions follow salary
+  cycles and meeting schedules — a steadier profile than one-off commerce.
+- **We are low-rebuild-risk.** The adapter and webhook are already built against a mock harness,
+  which reduces the engineering work required to reach sandbox testing. Final integration risk
+  will be assessed after GCA Pay confirms account-reference handling, field names, failure
+  states, reversal logic, settlement timing, and reconciliation reports.
 
 ---
 
-## 5. Go-to-market strategy
+## 8. Market context
 
-We're deliberately starting narrow and dense rather than wide and thin. The plan runs in
-three phases.
+The opportunity rests on three well-documented facts about Tanzania: mobile money at national
+scale, a highly connected population, and a strong (if shifting) savings culture. The figures
+below are drawn from the most recent authoritative sources available and should be
+re-confirmed against the primary publications before wider external circulation.
 
-**Phase 1 — Prove the loop (Months 0–6).**
-Launch in one or two urban centres (Dar es Salaam first). Win the individual saver with the
-one feature nobody else has: money to your number, split automatically. Acquisition is
-referral-led — the product is inherently shareable because you literally share your Dusco
-number to receive money. Target: a few thousand engaged users who deposit repeatedly, and a
-clean, reliable collect-and-split flow through GCA Pay.
+- **Mobile money is already at national scale.** In 2025, Tanzania recorded approximately
+  **7.96 billion mobile payment transactions (7,959.40 million) worth about TZS 255.13 trillion
+  (TZS 255,133.96 billion)**, with **75.78 million active mobile money subscriptions** and
+  approximately **1.98 million agents**. This confirms that Dusco is not trying to create a new
+  payment habit; it is building a purpose-based savings layer on top of payment behaviour that
+  already exists at scale.
+  *(Source: Bank of Tanzania, National Payment Systems Annual Report 2025.)*
+- **Digital savings are already growing fast.** Bank of Tanzania reported **97.53 million
+  digital-savings transactions in 2025 (up 110%), worth approximately TZS 3.18 trillion
+  (TZS 3,181.24 billion — up 263%)**, showing that mobile-based saving is no longer theoretical.
+  Dusco's opportunity is to make digital saving more structured, purpose-based, and
+  group-compatible.
+  *(Source: Bank of Tanzania, National Payment Systems Annual Report 2025.)*
+- **Connectivity is broad, but subscription counts are not the same as unique users.**
+  Tanzania's telecom subscription base is large, and smartphone penetration is now material,
+  with BoT/TCRA reporting **28.50 million smartphones and smartphone penetration of 41.82% in
+  2025**. This supports a smartphone-led rollout, especially in urban and peri-urban markets,
+  while keeping the first pilot narrow and controlled.
+  *(Source: TCRA Communications Statistics Report / BoT, 2025.)*
+- **Financial inclusion is high and mobile-led, but purpose-based and group saving is
+  under-served.** Formal financial inclusion reached **76% of adults in 2023**, with
+  mobile-money uptake at **72%**; participation in community microfinance / VICOBA-type groups
+  was about **12% of adults** (down from 16% in 2017) — a large but strained informal base that
+  a reliable digital tool can serve.
+  *(Source: FinScope Tanzania 2023, FSDT / NBS.)*
 
-**Phase 2 — Lead with groups (Months 6–18).**
-Chamas are the growth unlock. Each group brings 10–30 members at once, and the group admin
-does the selling for us. We'll partner with existing VICOBA networks, SACCOS, and community
-organisers, and give group treasurers a tool that makes their unpaid, stressful job easy.
-Groups also raise volume per user, because contributions are scheduled.
-
-**Phase 3 — Embed at the source (Months 18–36).**
-Move upstream to where money originates: employers and cooperatives paying salaries and
-proceeds directly to Dusco numbers, so saving happens before spending. This is the highest-
-quality volume — regular, large, and sticky — and it's where the partnership with GCA Pay
-compounds.
-
-**Channels throughout:** referral loops (built into the product), chama and community
-organisers, radio and vernacular social content, and agent/field partnerships in later
-phases. We're not planning to buy growth with expensive paid ads early — the product's
-share-to-receive mechanic and the group multiplier are the engine.
-
----
-
-## 6. Market opportunity
-
-Tanzania has a large, young, mobile-money-native population and a deep informal savings
-culture. Registered mobile-money accounts number in the tens of millions, and informal
-savings groups are counted in the hundreds of thousands. We are intentionally *not* quoting
-precise statistics here, because they deserve to be cited from a current source
-(FinScope Tanzania, the Bank of Tanzania, and TCRA) rather than half-remembered — and we'd
-rather hand you a number we can stand behind. The shape of the opportunity, though, is not in
-doubt: the behaviour exists at scale, the rails exist, and nothing joins them the way Dusco
-does.
-
-Our near-term serviceable market is urban and peri-urban smartphone users who already save by
-purpose, plus the organised chama networks around them. That is more than enough to build a
-meaningful business on before we ever discuss national scale.
+The structure of the opportunity is the point: the payment rails, the connected users, and the
+savings behaviour all exist at scale, yet no product connects purpose-based and group saving to
+interoperable payment rails the way Dusco is designed to. Our near-term serviceable market is
+urban and peri-urban smartphone users who already save by purpose, plus the organised *kikoba*
+networks around them.
 
 ---
 
-## 7. How Dusco makes money
+## 9. Assumptions (all editable)
 
-Three revenue lines, in order of certainty:
-
-1. **Cross-network deposit fee — 1%** (minimum 500 TZS), free when the sender is on the
-   settlement network. This rewards keeping money in the ecosystem and only charges the
-   genuine cost of crossing networks.
-2. **Withdrawal fee — 1%**, floored at 500 and capped at 5,000 TZS, and **waived entirely
-   after 90 days**. The waiver is deliberate: it pays people to save longer, which is good for
-   the user, good for our float, and good for your steady volume.
-3. **Float yield — planned, and conditional.** Aggregated balances can earn a return
-   (modelled at 8% p.a.), shared 70/30 between Dusco and users as an annual dividend. We flag
-   this honestly as **subject to the appropriate Bank of Tanzania licensing and/or a
-   compliant partnership structure**. It is upside in this plan, not booked base revenue, and
-   we will not build on it until it is cleared.
-
-For you, the revenue is the processing margin on every collection and disbursement Dusco
-drives — which is why the volume tables below matter more to this conversation than our own
-fee lines.
-
----
-
-## 8. Assumptions (all editable)
-
-These drive every number in Section 9. Change any of them and the model moves. The two we'd
-most like your input on are marked ★.
+These drive every number in Section 10. Change any of them and the model moves. **A2 is held
+deliberately conservative** and the scale scenarios are gated on the pilot (A10). The
+assumption we most want your input on is marked ★.
 
 | # | Assumption | Value used |
 |---|---|---|
 | A1 | Active depositors as a share of registered users | 60% |
-| A2 | Net amount saved per active depositor per month | TZS 50,000 |
+| A2 | Net amount saved per active depositor per month | TZS 50,000 (conservative base) |
 | A3 | Deposit transactions per active depositor per month | 2 |
 | A4 | Withdrawal volume as a share of deposit volume | 45% |
 | A5 | Share of deposits that are cross-network (Dusco fee-earning) | 50% |
 | A6 | Dusco blended transaction take (from A5 + capped withdrawal fees) | ≈ 0.77% of deposit inflow |
 | A7 ★ | **GCA Pay blended processing take on total volume (in + out)** | **0.6% — placeholder, to confirm with you** |
-| A8 | Flow calculated on *average* active users across the year, not year-end | (start + end) ÷ 2 × 60% |
-| A9 | Float yield, if/when licensed | 8% p.a., split 70% Dusco / 30% users |
+| A8 | Flow calculated on *average* active users across the year | (start + end) ÷ 2 × 60% |
+| A9 | Float yield, if/when licensed | 8% p.a., split 70% Dusco / 30% users — upside only |
+| A10 | **Pilot validation gate** | **The first 10 individual users and one *kikoba* group will validate onboarding, deposit frequency, average deposit size, fee acceptance, group contribution behaviour, withdrawal patterns, reconciliation accuracy, and settlement reliability before the model is scaled.** |
 
-**Registered users at year-end (the one lever that separates the scenarios):**
+**On A2:** early conversations suggest a realistic average monthly deposit above TZS 100,000
+is plausible. We deliberately do **not** adopt that into the model. TZS 50,000 stays as the
+base assumption until pilot data proves otherwise; any figure above it is treated as
+**pilot-validation upside**, not a planning number.
+
+**Registered users at year-end — scale scenarios, contingent on passing A10:**
 
 | Scenario | Year 1 | Year 2 | Year 3 |
 |---|---|---|---|
@@ -203,16 +354,18 @@ most like your input on are marked ★.
 | Base | 5,000 | 25,000 | 75,000 |
 | Best | 12,000 | 60,000 | 200,000 |
 
-Everything else follows from these and the assumptions above.
+These describe the post-pilot scale phase. They are not forecasts of the pilot, and they
+assume the pilot validates the loop.
 
 ---
 
-## 9. Three-scenario projections (TZS, 3 years)
+## 10. Three-scenario projections (TZS, 3 years — post-pilot scale)
 
-All figures are annual. **"Volume through GCA Pay"** is total money processed — collections in
-plus disbursements out — and is the number that sizes your side of the partnership.
+All figures are annual and describe the scale phase *after* a successful pilot. **"Volume
+through GCA Pay"** is total money processed — collections in plus disbursements out — the
+number that sizes your side of the partnership.
 
-### Base case — steady, referral-and-chama-led growth
+### Base case — steady, referral-and-group-led growth
 
 | Metric | Year 1 | Year 2 | Year 3 |
 |---|---|---|---|
@@ -249,140 +402,183 @@ plus disbursements out — and is the number that sizes your side of the partner
 | GCA Pay processing revenue @0.6% | TZS 2.35 M | TZS 11.7 M | TZS 37.6 M |
 | Dusco transaction revenue | TZS 2.1 M | TZS 10.4 M | TZS 33.3 M |
 
-**The honest read:** even the worst case is a real, growing stream of transactions, not a
-flat line. The gap between worst and best is driven almost entirely by one thing — whether
-groups and employers adopt — which is exactly where we're pointing our effort.
+**The honest read:** the gap between worst and best is driven almost entirely by one thing —
+whether groups and employers adopt — which is where we point our effort. All three scenarios
+assume the pilot first proves the loop.
 
 ---
 
-## 10. Cost model and path to break-even
+## 11. Revised unit economics
 
-A partner is right to ask whether the business underneath the volume is sound. Here is the
-honest version. Costs below are **planning placeholders** — replace them with your view of
-our real numbers. Everything is base case, TZS.
+A partner is right to test whether the business underneath the volume is sound. We do not hide
+the difficulty; we frame it precisely.
 
-**Annual cost assumptions (editable):**
+**The processing rate is the crux.** At the placeholder rate of 0.6% (A7), transaction
+economics do not stand up on their own: what Dusco pays to move money is roughly **0.87% of
+deposit inflow** (because total volume — in plus out — is about 1.45× inflow), while Dusco
+earns roughly **0.77% of inflow** from users on transactions. On fees alone, the transaction
+line is slightly negative before any fixed cost. This is a statement about the *rate*, not the
+model.
 
-| Cost line | Basis | Year 1 | Year 2 | Year 3 |
+**What we are asking, and what we are not.**
+- **0.6% is a placeholder, not an accepted price.** We are asking GCA Pay for a **partnership
+  rate**, agreed under a partnership structure — not a generic API price card.
+- **The commercial target** is that Dusco's transaction line is **at least neutral at early
+  volume and improves with scale**, as fixed costs spread and volume grows.
+- **Float yield is upside, not the foundation.** Dusco is not designed to depend on float to
+  survive. Any float / yield arrangement is conditional on the correct licensing and a
+  compliant bank structure (Section 2), and is excluded from base transaction economics.
+
+**The transaction-neutral rate — a commercial reference point.** Under the current assumptions,
+the indicative transaction-neutral processing rate is **approximately 0.53% of total processed
+volume before fixed operating costs**. (Total processed volume ≈ 1.45× deposit inflow, since
+withdrawals are ~45% of inflow; Dusco earns ~0.77% of inflow, so 0.77% ÷ 1.45 ≈ 0.53%.) This is
+not presented as a demand, because the final rate may depend on channel mix, fixed fees,
+settlement timing, reversals, and volume tiers. It gives both parties a commercial reference
+point: at rates above this level, Dusco's transaction line is negative before fixed costs; at or
+below this level, the model becomes more viable without relying on float.
+
+| GCA Pay rate on total processed volume | Effect on Dusco transaction line |
+|---|---|
+| 0.60% | Negative before fixed costs |
+| 0.53% | Approximately transaction-neutral |
+| 0.50% | Slightly positive before fixed costs |
+| 0.40% | More viable for early adoption |
+
+The single most powerful lever on the whole model is A7. A partnership rate that keeps the
+transaction line neutral pulls break-even forward in every scenario and grows the volume you
+process — the interests genuinely point the same way.
+
+---
+
+## 12. Cost model — lean pilot now, scaled model only after validation
+
+There are two cost models, and they must not be confused.
+
+**The scaled operating model is not the pilot budget, and it is not currently funded.** The
+figures below (roughly TZS 73.3M in the first scale year, rising with volume) describe a
+*scaled* operation with a team, infrastructure, and community marketing. They are an indicative
+planning model for the post-pilot phase, contingent on validation and appropriate funding. We
+do **not** present Dusco as operationally comfortable at that cost level today.
+
+*Indicative scaled operating model (post-pilot, not yet funded):*
+
+| Cost line | Basis | Scale Yr 1 | Scale Yr 2 | Scale Yr 3 |
 |---|---|---|---|---|
 | GCA Pay processing | 0.6% of total volume (A7) | TZS 7.8 M | TZS 47.0 M | TZS 156.6 M |
-| Team (blended, incl. founders' modest draw) | ~2 → ~6 people | TZS 36.0 M | TZS 72.0 M | TZS 120.0 M |
+| Team (blended) | ~2 → ~6 people | TZS 36.0 M | TZS 72.0 M | TZS 120.0 M |
 | Infrastructure / hosting | scales with users | TZS 3.0 M | TZS 8.0 M | TZS 18.0 M |
 | SMS / OTP / comms | ~TZS 100 / active user / month | TZS 1.8 M | TZS 10.8 M | TZS 36.0 M |
-| Marketing (community-led, lean) | referral + chama organisers | TZS 10.0 M | TZS 30.0 M | TZS 60.0 M |
+| Marketing (community-led) | referral + group organisers | TZS 10.0 M | TZS 30.0 M | TZS 60.0 M |
 | Compliance / legal / licensing | PDPC reg, DPO, counsel | TZS 8.0 M | TZS 12.0 M | TZS 20.0 M |
 | Contingency | 10% | TZS 6.7 M | TZS 18.0 M | TZS 41.1 M |
 | **Total operating cost** | | **TZS 73.3 M** | **TZS 197.8 M** | **TZS 451.7 M** |
 
-**Base-case profit & loss — two honest views:**
+**The pilot cost model is different in kind: lean, founder-led, and small.** The pilot is run
+without large payroll, without mass paid advertising, and without a scaled team. Cash outlay is
+kept to the essentials needed to run 10 users and one group safely on real rails. Figures are
+planning placeholders for the pilot period, to be firmed up with real quotes.
 
-| | Year 1 | Year 2 | Year 3 |
-|---|---|---|---|
-| *Conservative (transaction fees only)* | | | |
-| Revenue | TZS 6.9 M | TZS 41.6 M | TZS 138.6 M |
-| Operating cost | (TZS 73.3 M) | (TZS 197.8 M) | (TZS 451.7 M) |
-| **Net** | **(TZS 66.4 M)** | **(TZS 156.2 M)** | **(TZS 313.1 M)** |
-| *Real model (with float, once licensed)* | | | |
-| Revenue (fees + Dusco float share) | TZS 20.9 M | TZS 152.6 M | TZS 608.6 M |
-| Operating cost | (TZS 73.3 M) | (TZS 197.8 M) | (TZS 451.7 M) |
-| **Net** | **(TZS 52.4 M)** | **(TZS 45.2 M)** | **+TZS 156.9 M** |
+*Lean pilot cost model (founder-led):*
 
-**What this says, plainly:**
+| Pilot cost line | What it covers | Indicative pilot outlay |
+|---|---|---|
+| Technical integration | GCA Pay sandbox integration and testing (founder time; minimal tooling) | Low; founder-led, final quote pending |
+| Compliance / legal documentation | Privacy notice, consent copy, DPA review, PDPC registration prep | Modest; counsel/registration cost to be confirmed |
+| Security hardening | Close identified pre-pilot hardening items before live pilot | Founder-led, with minimal tooling cost before pilot |
+| Pilot onboarding | Direct, low-cost onboarding of 10 users + 1 group (no paid acquisition) | Near-zero cash |
+| Manual support | Founder-led customer support through the pilot | Founder time |
+| Reconciliation testing | Verifying deposits, splits, and settlement against GCA Pay reports | Founder time |
+| Hosting (pilot tier) | A paid always-on tier so the service does not sleep | Low; founder-led, final quote pending |
 
-- **On transaction fees alone, at a 0.6% processing rate, Dusco does not stand up.** The reason
-  is direct and it's the crux of our conversation: at that rate, what we pay you to move money
-  (~0.87% of deposit inflow, because total volume is ~1.45× inflow) is *more* than the ~0.77%
-  we earn from users on transactions. Fixed costs then do the rest of the damage. This isn't a
-  flaw in the idea — it's a statement about the **processing rate**, which is exactly why we
-  want to set it with you rather than accept a default.
-- **The real model works through two things: float and operating leverage.** Once savings
-  balances are put to work (subject to licensing) and the fixed cost base is spread over more
-  users, the base case **turns cash-positive in Year 3**, having absorbed a cumulative
-  ~TZS 98 million along the way — roughly USD 40,000. That is a **capital-light** path, which
-  is part of why we aren't raising a large round.
+The principle is explicit: **compliance and payment-integration essentials first; a scaled cost
+model only after the pilot validates the loop.** We are not seeking to run the scaled model
+before there is evidence to justify it.
 
-**Break-even by scenario (real model, with float):**
+**Break-even (scaled model, real model with float once licensed) — indicative:**
 
 | Scenario | Turns cash-positive | Peak cumulative cash needed |
 |---|---|---|
-| Best | Year 2 | ~TZS 55 M |
-| Base | Year 3 | ~TZS 98 M |
-| Worst | Beyond Year 3 | requires tighter cost control or a lower processing rate |
+| Best | Scale Year 2 | ~TZS 55 M |
+| Base | Scale Year 3 | ~TZS 98 M |
+| Worst | Beyond Scale Year 3 | requires tighter cost control or a better processing rate |
 
-The single most powerful lever on all of this is your rate (A7). A partnership rate that
-keeps Dusco's transaction line at least neutral pulls break-even forward in every scenario and
-grows the volume you process — the interests genuinely point the same way.
-
----
-
-## 11. What moves the numbers (sensitivities)
-
-If you only stress-test three things, make them these:
-
-- **Group adoption.** Each converted chama is 10–30 users acquired in a single stroke and a
-  higher deposit frequency. This is the single biggest swing between scenarios.
-- **Average balance retained (the 90-day waiver at work).** The longer money stays, the more
-  float builds and the steadier your disbursement profile. Small changes here compound.
-- **Your processing rate (A7).** It sets both your revenue and our viable pricing. We'd rather
-  agree a rate that keeps both sides healthy at low volume than a high rate that stalls
-  adoption and starves the pipe.
+Break-even depends materially on A7 and on float being licensed; neither is assumed in the
+pilot.
 
 ---
 
-## 12. Risks and how we're handling them
+## 13. What we are asking of GCA Pay
+
+Since this is not a fundraise, the ask is concrete:
+
+1. **Sandbox credentials** to complete and certify the integration.
+2. **Account-reference confirmation.** Formal confirmation that each Dusco **user** and each
+   **group** can be assigned a unique account reference, virtual account, payment reference, or
+   equivalent identifier, so inbound money can be routed to the correct Dusco number. (This was
+   indicated as possible or worth validating in our meeting; we ask GCA Pay to confirm it
+   formally.)
+3. **Channel coverage.** Confirmation of collections and disbursements across mobile-money
+   networks and banks.
+4. **Operational parameters.** Supported channels, transaction limits, failed-transaction
+   handling, reversal handling, settlement timing, and reconciliation reports.
+5. **Commercial terms.** A proposed partnership processing rate and settlement terms.
+6. **Funds-holding structure.** Support in defining a compliant funds-holding structure with a
+   licensed bank or regulated financial institution.
+7. **Compliance and security.** A Data Processing Agreement and your technical-security
+   requirements for integrating partners.
+8. **Division of responsibilities.** A clear, written division of responsibilities between
+   Larson Consulting / Dusco, GCA Pay, and the bank / custody partner — including where KYC/AML
+   obligations sit.
+
+---
+
+## 14. Risks and how we are handling them
 
 | Risk | Our response |
 |---|---|
-| **Adoption is slower than hoped** | Start narrow and dense; lead with groups where one sale brings many users; don't burn cash on paid growth early. |
-| **Regulatory — savings & float** | Treat float yield as conditional, not booked. Engage the Bank of Tanzania early and, where sensible, operate money movement under a licensed partner's umbrella. |
-| **Data protection (PDPA, Cap. 44)** | Financial-transaction data is *sensitive* under the Act. We've done a gap assessment, design for consent, minimisation and security, and will sign a Data Processing Agreement with GCA Pay as our processor. |
-| **Dependence on one payments partner** | The architecture keeps the payment layer behind a clean interface, so we're a strong partner rather than a captive one — but our clear preference is to grow this with GCA Pay. |
-| **Trust with people's savings** | Privacy-by-default, transparent fees shown at every step, group ledgers that remove the cash-box risk, and no hidden charges. |
+| **Funds custody / deposit-taking** | Dusco does not hold customer funds; funds sit with a licensed institution. Structure to be defined with GCA Pay and a bank partner (Section 2). |
+| **Regulatory — savings & float** | Float treated as conditional upside, not booked. Engage Bank of Tanzania and operate money movement under licensed partners. |
+| **No live traction yet** | Controlled pilot (10 users + 1 group) with explicit KPI gates before any scale spend (Sections 5, 9). |
+| **Data protection (PDPA, Cap. 44)** | Financial-transaction data treated as high-risk personal data (final classification subject to counsel). Gap assessment done; design for consent, minimisation, security; DPA with GCA Pay before live processing. |
+| **Pre-pilot security hardening** | Access-control, secrets-management, OTP, database-security, rate-limiting, and audit-logging items identified and scheduled before any live customer funds; not claimed as done. |
+| **Dependence on one payments partner** | Payment layer sits behind a clean interface; our clear preference is to grow with GCA Pay. |
+| **Trust with savings** | Privacy-by-default, fees shown before every transaction, group ledgers that remove cash-box risk. |
 
 ---
 
-## 13. Roadmap
+## 15. Roadmap
 
-- **Now:** product built and deployed; GCA Pay adapter and webhook written and tested against
-  mock; demo live.
-- **Next (0–3 months):** sandbox integration with GCA Pay; agree processing rate and settlement;
-  close the pre-launch compliance items (consent, privacy notice, security hardening).
-- **3–6 months:** production launch in Dar es Salaam; first thousands of users; the loop
-  running on real rails.
-- **6–18 months:** chama-led scale; SACCOS and community partnerships.
-- **18–36 months:** employer and cooperative payroll integrations; broaden geographically.
-
----
-
-## 14. What we're asking of GCA Pay
-
-Since this isn't a fundraise, the "ask" is simple and concrete:
-
-1. **Sandbox access** to complete and certify the integration.
-2. **A processing rate and settlement terms** we can build on — set together, so both sides win
-   at low volume and scale.
-3. **Confirmation of the collections model** — specifically, whether each user can be addressed
-   by a unique account reference (their Dusco number) on the way in.
-4. **A Data Processing Agreement**, so we're compliant with the Personal Data Protection Act
-   from day one.
-
-Give us those four, and we move from a working demo to real money moving across your rails —
-quickly, because the hard engineering is already done.
+- **Now:** working build deployed for demonstration; GCA Pay adapter and webhook built and
+  tested against a mock harness; no live transactions; 10 individual users and one *kikoba*
+  group in the onboarding pipeline.
+- **Pre-pilot (0–3 months):** sandbox integration; confirm account-reference model and terms;
+  close pre-pilot compliance and security items (consent, privacy notice, access control,
+  secrets management, OTP); define funds-holding structure with a bank partner.
+- **Pilot:** run 10 individual users and one group on real rails; measure the Section 5 KPIs;
+  validate reconciliation and settlement.
+- **Post-pilot, if KPIs pass:** dense community launch (Dar es Salaam); then group-led scale;
+  then employer / cooperative / payroll integration.
 
 ---
 
-## 15. Closing
+## 16. Closing
 
-Dusco isn't asking Tanzanians to save differently. It's giving a deeply-rooted habit a
-digital form, and it needs a payments partner who can reach every shilling wherever it lives.
-The product works, the integration is built, and the behaviour we're digitising is already
-happening at scale. What's left is to turn it on together.
+Dusco is not asking Tanzanians to save differently. It gives a deeply rooted habit a digital
+form, under a registered company, with a clear separation between the technology layer
+(Dusco / Larson Consulting), the payment layer (GCA Pay), and a licensed funds-holding partner.
+The application is built and integrated against a mock harness; what remains is to prove the
+loop on your rails with a small, controlled pilot, on commercial terms that work for both sides.
 
-We'd welcome your rate and your sandbox keys as the next step.
+We would welcome your sandbox credentials, your confirmation on the account-reference model, and
+a conversation about a partnership rate as the next step.
 
 ---
 
 *Figures in this document are planning estimates built on the stated assumptions and are for
-partnership discussion. Market statistics should be validated against current FinScope
-Tanzania, Bank of Tanzania, and TCRA data before external publication. Float-based revenue is
-contingent on appropriate licensing.*
+partnership discussion. Scale scenarios are contingent on a successful pilot (A10). Market
+statistics are drawn from Bank of Tanzania, TCRA, and FinScope Tanzania sources as reported and
+should be re-confirmed against the primary publications before wider external circulation. Float-based
+revenue is contingent on appropriate licensing and a compliant bank structure. Technical
+claims are limited to what is verified in the codebase; see the accompanying technical
+validation checklist.*
