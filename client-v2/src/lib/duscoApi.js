@@ -121,6 +121,15 @@ export const api = {
   dividendProjection: () => request("/dividends/projection"),
   dividendHistory: () => request("/dividends/history"),
 
+  // ---- Consent (PDPA Cap. 44) ----
+  // The durable record lives on the server as an append-only audit log, not in
+  // browser storage: it must survive a cleared cache and follow the account
+  // across devices.
+  consentPurposes: () => request("/consent/purposes", { auth: false }),
+  getConsent: () => request("/consent"),
+  consentHistory: () => request("/consent/history"),
+  recordConsent: (body) => request("/consent", { method: "POST", body }),
+
   // ---- Notifications ----
   getNotifications: () => request("/notifications"),
   markNotificationRead: (id) => request(`/notifications/${id}/read`, { method: "PUT" }),

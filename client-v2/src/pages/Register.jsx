@@ -33,14 +33,19 @@ export default function Register() {
     if (!validate()) return;
     setLoading(true);
     try {
+      // Consent goes to the server with the registration itself. The backend
+      // validates it before creating the account and rolls the account back if
+      // the consent record cannot be written — so an account never exists
+      // without the record that justifies processing its data.
       const res = await api.register({
         name: form.name.trim(),
         phone: form.phone.trim(),
         password: form.password,
+        consents: [
+          { purpose: "service_operation", granted: true },
+          { purpose: "marketing", granted: !!consents.marketing },
+        ],
       });
-      // Stash consents locally (record what they agreed to + when)
-      const record = { operate: true, marketing: consents.marketing, at: new Date().toISOString() };
-      sessionStorage.setItem("dusco_consents", JSON.stringify(record));
       navigate("/verify-otp", {
         state: { phone: form.phone.trim(), name: form.name.trim(), duscoNumber: res.duscoNumber },
       });

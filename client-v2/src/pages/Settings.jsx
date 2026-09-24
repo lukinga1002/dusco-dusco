@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useDuscoAuth } from "@/lib/DuscoAuthContext";
 import { api } from "@/lib/duscoApi";
 import QueryFeedback from "@/components/dusco/QueryFeedback";
+import ConsentSettings from "@/components/dusco/ConsentSettings";
 import { formatDate } from "@/lib/duscoFormat";
 
 export default function Settings() {
@@ -19,7 +20,6 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const profile = useQuery({ queryKey: ["dusco", user?.id, "profile"], queryFn: () => api.me(), retry: false, staleTime: 60000 });
   const me = profile.data || user || {};
-  const consent = readConsent();
   const currentName = name ?? (me.name || "");
   const saveName = async (event) => {
     event.preventDefault();
@@ -38,13 +38,6 @@ export default function Settings() {
     logout();
     client.removeQueries({ queryKey: ["dusco"] });
     navigate("/login", { replace: true });
-  };
-  const withdrawMarketing = () => {
-    try {
-      const record = readConsent();
-      sessionStorage.setItem("dusco_consents", JSON.stringify({ ...record, marketing: false, withdrawnAt: new Date().toISOString() }));
-    } catch {}
-    setNotice("Marketing consent withdrawn on this device. A durable account-level record needs backend support — we've noted it as pending.");
   };
   return <div className="space-y-6">
     <header><h1 className="font-display text-3xl font-semibold">Settings</h1><p className="mt-2 text-sm text-muted-foreground">Your profile, consents, and data rights.</p></header>
@@ -65,18 +58,7 @@ export default function Settings() {
       </section>
       <section className="space-y-3 rounded-2xl border bg-card p-5">
         <h2 className="font-display text-lg font-semibold">Your consent</h2>
-        {consent ? <>
-          <div className="rounded-xl bg-muted p-4 text-sm">
-            <p className="font-medium">Operating consent — active</p>
-            <p className="mt-1 text-xs text-muted-foreground">Agreed {formatDate(consent.at)}. Required to run your savings account.</p>
-          </div>
-          <div className="rounded-xl bg-muted p-4 text-sm">
-            <p className="font-medium">Marketing messages — {consent.marketing ? "active" : "withdrawn"}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{consent.marketing ? `Agreed ${formatDate(consent.at)}.` : consent.withdrawnAt ? `Withdrawn ${formatDate(consent.withdrawnAt)}.` : "Not agreed."}</p>
-            {consent.marketing && <Button variant="outline" className="mt-3 min-h-11" onClick={withdrawMarketing}>Withdraw marketing consent</Button>}
-          </div>
-          <p className="text-xs text-muted-foreground">Consent is currently recorded on this device. A durable account-level record is pending backend support.</p>
-        </> : <p className="text-sm text-muted-foreground">No consent record found on this device. If you registered on another device, your consent travels with your account on the backend.</p>}
+        <ConsentSettings />
       </section>
       <section className="space-y-3 rounded-2xl border bg-card p-5">
         <h2 className="font-display text-lg font-semibold">Notification preferences</h2>
@@ -98,8 +80,4 @@ export default function Settings() {
     </>}
     <Button variant="outline" className="min-h-12 w-full gap-2 text-destructive" onClick={signOut}><LogOut className="h-4 w-4" />Log out</Button>
   </div>;
-}
-
-function readConsent() {
-  try { return JSON.parse(sessionStorage.getItem("dusco_consents") || "null"); } catch { return null; }
 }
