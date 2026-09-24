@@ -2,14 +2,30 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { supabase, getUniqueDuscoNumber } = require('../db/database');
 const { generateToken, authenticateToken } = require('../middleware/auth');
+const { recordConsent, validateDecisions } = require('../services/consent');
 
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
   try {
-    const { phone, name, password } = req.body;
+    const { phone, name, password, consents } = req.body;
     if (!phone || !name || !password) return res.status(400).json({ error: 'Phone, name, and password are required' });
     if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+
+    // Validate consent BEFORE creating the user, so we can never end up with an
+    // account that exists without the consent record that justifies processing.
+    // Consent is optional here only for backwards compatibility with the older
+    // client; make it mandatory before the live pilot (see docs/PDPA_COMPLIANCE.md).
+    if (consents !== undefined) {
+      const check = validateDecisions(consents);
+      if (!check.ok) return res.status(400).json({ error: check.error });
+      const serviceConsent = check.decisions.find(d => d.purpose === 'service_operation');
+      if (!serviceConsent || !serviceConsent.granted) {
+        return res.status(400).json({
+          error: 'Consent to operate your savings service is required to register.',
+        });
+      }
+    }
 
     const { data: existing } = await supabase.from('users').select('id').eq('phone', phone).maybeSingle();
     if (existing) return res.status(409).json({ error: 'Phone number already registered' });
@@ -22,7 +38,26 @@ router.post('/register', async (req, res) => {
       .select('id, dusco_number, phone').single();
 
     if (error) throw error;
-    res.status(201).json({ message: 'Registration successful. Please verify your phone.', userId: data.id, duscoNumber: data.dusco_number, phone });
+
+    let consentRecorded = false;
+    if (consents !== undefined) {
+      try {
+        await recordConsent(data.id, consents, { source: 'registration' });
+        consentRecorded = true;
+      } catch (consentErr) {
+        // The account exists but its consent record failed to write. Roll the
+        // account back rather than run a savings service with no lawful basis.
+        await supabase.from('users').delete().eq('id', data.id);
+        return res.status(500).json({
+          error: 'Could not record your consent, so the account was not created. Please try again.',
+        });
+      }
+    }
+
+    res.status(201).json({
+      message: 'Registration successful. Please verify your phone.',
+      userId: data.id, duscoNumber: data.dusco_number, phone, consentRecorded,
+    });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
