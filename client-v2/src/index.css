@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 42 38% 97%;
+    --foreground: 216 38% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 216 38% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 216 38% 16%;
+    --primary: 216 46% 27%;
+    --primary-foreground: 42 38% 98%;
+    --secondary: 40 30% 92%;
+    --secondary-foreground: 216 38% 16%;
+    --muted: 40 30% 92%;
+    --muted-foreground: 215 13% 42%;
+    --accent: 214 31% 93%;
+    --accent-foreground: 216 46% 27%;
+    --destructive: 0 62% 43%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 38 20% 86%;
+    --input: 38 20% 86%;
+    --ring: 216 46% 27%;
+    --brand-deep: 216 46% 20%;
+    --brand-tint: 213 32% 96%;
+    --success: 151 44% 29%;
+    --success-soft: 150 25% 92%;
+    --brass: 38 65% 34%;
+    --brass-soft: 42 70% 88%;
+    --chart-1: 216 46% 27%;
+    --chart-2: 203 28% 38%;
+    --chart-3: 151 30% 38%;
+    --chart-4: 38 65% 34%;
+    --chart-5: 15 34% 44%;
+    --radius: 0.5rem;
+    --font-heading: "Switzer", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Switzer", ui-sans-serif, system-ui, sans-serif;
+    --font-display: "Fraunces", "Plus Jakarta Sans", ui-serif, Georgia, serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 216 32% 10%;
+    --foreground: 42 30% 94%;
+    --card: 216 30% 14%;
+    --card-foreground: 42 30% 94%;
+    --popover: 216 30% 14%;
+    --popover-foreground: 42 30% 94%;
+    --primary: 213 49% 73%;
+    --primary-foreground: 216 38% 16%;
+    --secondary: 216 23% 19%;
+    --secondary-foreground: 42 30% 94%;
+    --muted: 216 23% 19%;
+    --muted-foreground: 214 16% 69%;
+    --accent: 215 30% 23%;
+    --accent-foreground: 213 49% 80%;
+    --destructive: 0 60% 62%;
+    --destructive-foreground: 216 32% 10%;
+    --border: 215 21% 27%;
+    --input: 215 21% 27%;
+    --ring: 213 49% 73%;
+    --brand-deep: 213 42% 62%;
+    --brand-tint: 216 29% 16%;
+    --success: 151 38% 62%;
+    --success-soft: 151 24% 18%;
+    --brass: 40 66% 67%;
+    --brass-soft: 38 31% 20%;
+    --chart-1: 213 49% 73%;
+    --chart-2: 203 34% 65%;
+    --chart-3: 151 30% 56%;
+    --chart-4: 40 66% 67%;
+    --chart-5: 15 38% 64%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body;
+  }
+}

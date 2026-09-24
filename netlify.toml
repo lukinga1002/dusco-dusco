@@ -1,13 +1,16 @@
 [build]
-  base = "client"
+  base = "client-v2"
   command = "npm run build"
   publish = "dist"
 
+# client-v2 calls the backend directly at its absolute URL, but this proxy is
+# kept so relative /api/* calls also work if anything is switched back to them.
 [[redirects]]
   from = "/api/*"
   to = "https://dusco-dusco.onrender.com/api/:splat"
   status = 200
 
+# SPA fallback — required for React Router deep links (/app, /privacy, ...)
 [[redirects]]
   from = "/*"
   to = "/index.html"
