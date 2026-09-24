@@ -1,0 +1,18 @@
+{
+  "name": "Dusco — One number. Many envelopes.",
+  "short_name": "Dusco",
+  "description": "Tanzanian digital savings that split money automatically across your bahashas. Operated by Larson Consulting.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FBF8F3",
+  "theme_color": "#ED1B24",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
