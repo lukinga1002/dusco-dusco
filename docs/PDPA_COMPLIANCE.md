@@ -49,11 +49,14 @@ consent of" the data subject. Dusco processes financial-transaction data.
 - **Deliberately not stored:** IP address and user agent. They would strengthen evidence
   of consent but are additional personal data; the privacy-protective default was taken.
   Add them only if counsel requires stronger proof.
+- **Done (UI, 2026-09-24):** client-v2 registration sends `consents` with the register
+  call, and Settings reads/writes the server record via `ConsentSettings.jsx` — including
+  a user-visible consent history and a re-confirmation banner when the notice version
+  moves on. No consent is kept in browser storage any more.
 - **Still open:** (a) consent is **optional** on register for backwards compatibility with
-  the older client — make it **mandatory** before the live pilot; (b) the new client-v2 UI
-  must call these endpoints instead of keeping consent in `localStorage`; (c) withdrawal
-  of `service_operation` must be wired to an account-closure flow, since the service
-  cannot lawfully continue without it.
+  the older `client/` — make it **mandatory** before the live pilot; (b) withdrawal of
+  `service_operation` is recorded but must be wired to an account-closure flow, since the
+  service cannot lawfully continue without it (depends on the deletion endpoint below).
 
 **R2 — Operating without registration as a data controller/processor (s.14–16, s.19)**
 Controllers/processors must register with the PDPC (5-year registration); operating
