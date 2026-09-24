@@ -159,9 +159,109 @@ async function deleteAccount(userId, password) {
   };
 }
 
+/**
+ * Export everything Dusco holds about this person (PDPA right of access and
+ * data portability), as structured JSON.
+ *
+ * The hard constraint here is that an export must contain THIS person's data
+ * and nobody else's. Group records are shared by their nature, so only the
+ * person's own slice of a group is included — their role, their contributions,
+ * their share ledger. Other members' names, phone numbers, balances and
+ * contributions are deliberately left out: exercising one person's right of
+ * access must not become a way to extract data about everyone they save with.
+ *
+ * Requires the password: this hands over a complete financial history in one
+ * response, so a session someone walked away from should not be enough.
+ */
+async function exportAccountData(userId, password) {
+  const { data: user } = await supabase
+    .from('users')
+    .select('id, name, phone, dusco_number, is_verified, created_at, password_hash, deleted_at')
+    .eq('id', userId).maybeSingle();
+  if (!user) throw Object.assign(new Error('Account not found'), { statusCode: 404 });
+  if (user.deleted_at) throw Object.assign(new Error('This account has been closed'), { statusCode: 410 });
+
+  if (!password || !bcrypt.compareSync(password, user.password_hash)) {
+    throw Object.assign(new Error('Enter your current password to download your data'), { statusCode: 401 });
+  }
+
+  const [bahashas, transactions, dividends, notifications, consents, memberships] = await Promise.all([
+    supabase.from('bahashas')
+      .select('id, name, percentage, balance, color, is_locked, lock_until, goal_name, goal_amount, created_at')
+      .eq('user_id', userId).order('created_at'),
+    supabase.from('transactions')
+      .select('id, bahasha_id, type, amount, fee, source_network, destination_phone, destination_network, reference, status, description, held_since, created_at')
+      .eq('user_id', userId).order('created_at'),
+    supabase.from('dividends')
+      .select('id, bahasha_id, amount, yield_rate, period_start, period_end, created_at')
+      .eq('user_id', userId).order('created_at'),
+    supabase.from('notifications')
+      .select('id, title, message, type, is_read, created_at')
+      .eq('user_id', userId).order('created_at'),
+    supabase.from('consents')
+      .select('id, purpose, granted, policy_version, source, created_at')
+      .eq('user_id', userId).order('created_at'),
+    supabase.from('group_members')
+      .select('group_id, role, status, joined_at, groups(name, dusco_number, contribution_frequency)')
+      .eq('user_id', userId),
+  ]);
+
+  // Only this person's slice of each group.
+  const groups = [];
+  for (const m of memberships.data || []) {
+    const [shares, groupTxns] = await Promise.all([
+      supabase.from('group_shares')
+        .select('id, amount, created_at').eq('group_id', m.group_id).eq('user_id', userId).order('created_at'),
+      supabase.from('group_transactions')
+        .select('id, type, amount, fee, description, reference, created_at')
+        .eq('group_id', m.group_id).eq('user_id', userId).order('created_at'),
+    ]);
+    const shareRows = shares.data || [];
+    groups.push({
+      groupName: m.groups?.name || null,
+      groupDuscoNumber: m.groups?.dusco_number || null,
+      contributionFrequency: m.groups?.contribution_frequency || null,
+      yourRole: m.role,
+      membershipStatus: m.status,
+      joinedAt: m.joined_at,
+      yourSharesTotal: shareRows.reduce((sum, s) => sum + (s.amount || 0), 0),
+      yourShareContributions: shareRows,
+      yourGroupTransactions: groupTxns.data || [],
+    });
+  }
+
+  return {
+    export: {
+      format: 'dusco-export-v1',
+      generatedAt: new Date().toISOString(),
+      about: 'Everything Dusco holds about you, provided under your right of access and data portability (Personal Data Protection Act, Cap. 44, 2023).',
+    },
+    profile: {
+      name: user.name,
+      phone: user.phone,
+      duscoNumber: user.dusco_number,
+      phoneVerified: user.is_verified,
+      memberSince: user.created_at,
+    },
+    consentHistory: consents.data || [],
+    bahashas: bahashas.data || [],
+    transactions: transactions.data || [],
+    dividends: dividends.data || [],
+    notifications: notifications.data || [],
+    groups,
+    notIncluded: [
+      'Your password, which is stored only as an irreversible hash and cannot be exported.',
+      'Other members of your groups — their names, phone numbers, balances and contributions are their personal data, not yours.',
+      'Group-level balances, which belong to the group rather than to any one member.',
+      'Internal system logs and payment-provider records held for security and reconciliation.',
+    ],
+  };
+}
+
 module.exports = {
   LEDGER_RETENTION_YEARS,
   getDeletionBlockers,
   getDeletionPreview,
   deleteAccount,
+  exportAccountData,
 };
