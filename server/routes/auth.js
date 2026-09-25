@@ -4,13 +4,24 @@ const { supabase, getUniqueDuscoNumber } = require('../db/database');
 const { generateToken, authenticateToken } = require('../middleware/auth');
 const { recordConsent, validateDecisions } = require('../services/consent');
 
+// Languages the UI can actually render end to end. Adding one here without a
+// complete dictionary would produce a half-translated screen.
+const SUPPORTED_LANGUAGES = ['en', 'sw'];
+
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
   try {
-    const { phone, name, password, consents } = req.body;
+    const { phone, name, password, consents, language } = req.body;
     if (!phone || !name || !password) return res.status(400).json({ error: 'Phone, name, and password are required' });
     if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+
+    // Language is chosen at registration. Reject anything we cannot actually
+    // render rather than silently storing it and falling back later.
+    const lang = language === undefined ? 'en' : language;
+    if (!SUPPORTED_LANGUAGES.includes(lang)) {
+      return res.status(400).json({ error: `Language must be one of: ${SUPPORTED_LANGUAGES.join(', ')}` });
+    }
 
     // Validate consent BEFORE creating the user, so we can never end up with an
     // account that exists without the consent record that justifies processing.
@@ -34,8 +45,8 @@ router.post('/register', async (req, res) => {
     const duscoNumber = await getUniqueDuscoNumber();
 
     const { data, error } = await supabase.from('users')
-      .insert({ phone, name, password_hash: passwordHash, dusco_number: duscoNumber })
-      .select('id, dusco_number, phone').single();
+      .insert({ phone, name, password_hash: passwordHash, dusco_number: duscoNumber, language: lang })
+      .select('id, dusco_number, phone, language').single();
 
     if (error) throw error;
 
@@ -56,7 +67,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       message: 'Registration successful. Please verify your phone.',
-      userId: data.id, duscoNumber: data.dusco_number, phone, consentRecorded,
+      userId: data.id, duscoNumber: data.dusco_number, phone, language: data.language, consentRecorded,
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -92,24 +103,34 @@ router.post('/login', async (req, res) => {
     }
 
     const token = generateToken(user.id);
-    res.json({ token, user: { id: user.id, phone: user.phone, name: user.name, duscoNumber: user.dusco_number, isVerified: user.is_verified } });
+    res.json({ token, user: { id: user.id, phone: user.phone, name: user.name, duscoNumber: user.dusco_number, isVerified: user.is_verified, language: user.language || 'en' } });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 router.get('/me', authenticateToken, async (req, res) => {
   try {
-    const { data: user } = await supabase.from('users').select('id, phone, name, dusco_number, is_verified, created_at').eq('id', req.userId).single();
+    const { data: user } = await supabase.from('users').select('id, phone, name, dusco_number, is_verified, created_at, language').eq('id', req.userId).single();
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json({ id: user.id, phone: user.phone, name: user.name, duscoNumber: user.dusco_number, isVerified: user.is_verified, createdAt: user.created_at });
+    res.json({ id: user.id, phone: user.phone, name: user.name, duscoNumber: user.dusco_number, isVerified: user.is_verified, createdAt: user.created_at, language: user.language || 'en' });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 router.put('/profile', authenticateToken, async (req, res) => {
   try {
-    const { name } = req.body;
-    if (!name) return res.status(400).json({ error: 'Name is required' });
-    await supabase.from('users').update({ name, updated_at: new Date().toISOString() }).eq('id', req.userId);
-    res.json({ message: 'Profile updated' });
+    const { name, language } = req.body;
+    if (!name && !language) return res.status(400).json({ error: 'Nothing to update' });
+
+    const updates = { updated_at: new Date().toISOString() };
+    if (name) updates.name = name;
+    if (language !== undefined) {
+      if (!SUPPORTED_LANGUAGES.includes(language)) {
+        return res.status(400).json({ error: `Language must be one of: ${SUPPORTED_LANGUAGES.join(', ')}` });
+      }
+      updates.language = language;
+    }
+
+    await supabase.from('users').update(updates).eq('id', req.userId);
+    res.json({ message: 'Profile updated', ...(updates.language ? { language: updates.language } : {}) });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
