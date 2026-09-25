@@ -95,7 +95,7 @@ consent of" the data subject. Dusco processes financial-transaction data.
 **R2 — Operating without registration as a data controller/processor (s.14–16, s.19)**
 Controllers/processors must register with the PDPC (5-year registration); operating
 unregistered is an **offence**. Dusco is not registered.
-- **Mitigation:** Register Dusco as a data controller (and GCA Pay/Supabase/Render as
+- **Mitigation:** Register Dusco as a data controller (and the payment partner/Supabase/Render as
   processors) with the PDPC **before public launch**; keep the certificate and renew
   within 3 months of expiry. Pre-launch blocker, not code.
 

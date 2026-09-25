@@ -102,7 +102,7 @@ async function simulateDividendDistribution() {
     payouts.push({ user_id: user.id, amount: dividend, destination: user.phone });
   }
 
-  // Mock bulk payout via GCA Pay
+  // Mock bulk payout via the PSP
   if (payouts.length > 0) {
     await bulkPayout({ payouts });
   }

@@ -1,8 +1,8 @@
 /**
- * Payment operation schemas for GCA Pay integration
+ * Payment operation schemas for the PSP integration
  *
  * These types define the interface between Dusco and the payment provider.
- * Currently mocked; will map to GCA Pay API endpoints when integrated.
+ * Currently mocked; will map to the PSP's API endpoints when integrated.
  */
 
 const SUPPORTED_NETWORKS = ['M-Pesa', 'Tigo Pesa', 'Airtel', 'Halotel', 'CRDB', 'NMB', 'Selcom'];

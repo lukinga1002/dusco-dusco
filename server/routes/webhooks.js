@@ -1,27 +1,27 @@
 /**
- * GCA Pay webhook receiver.
+ * Payment provider webhook receiver.
  *
  * Mounted with a RAW body parser (see index.js) so we can verify the signature over the
- * exact bytes GCA Pay sent. Flow:
+ * exact bytes the payment provider sent. Flow:
  *   1. verify HMAC signature (reject if invalid)
  *   2. idempotency: record event_id; ignore duplicates
  *   3. route by event type:
  *        - collection completed  → resolve Dusco number → split into bahashas
  *        - disbursement completed/failed → mark the matching withdrawal
- *   4. always 200 quickly so GCA Pay doesn't retry a success
+ *   4. always 200 quickly so the payment provider doesn't retry a success
  *
- * Field names below are tolerant of several shapes; lock them to GCA Pay's real payload
+ * Field names below are tolerant of several shapes; lock them to the payment provider's real payload
  * once you have the sandbox docs.
  */
 
 const express = require('express');
 const { supabase } = require('../db/database');
-const { verifyWebhookSignature } = require('../services/gcapay');
+const { verifyWebhookSignature } = require('../services/psp');
 const { applyIncomingCollection } = require('../services/deposits');
 
 const router = express.Router();
 
-const SIGNATURE_HEADERS = ['x-gcapay-signature', 'x-signature', 'signature'];
+const SIGNATURE_HEADERS = ['x-psp-signature', 'x-signature', 'signature'];
 
 const pick = (obj, keys) => { for (const k of keys) { if (obj?.[k] != null) return obj[k]; } return undefined; };
 
@@ -46,17 +46,17 @@ const isDisbursement = (t) => /disburse|b2c|payout|withdraw/.test(t);
 const isSuccess = (s) => /success|complete|paid|settled/.test(s);
 const isFailure = (s) => /fail|declin|revers|cancel/.test(s);
 
-// POST /api/webhooks/gcapay   (raw body — Buffer)
-router.post('/gcapay', async (req, res) => {
+// POST /api/webhooks/psp   (raw body — Buffer)
+router.post('/psp', async (req, res) => {
   const raw = req.body; // Buffer, from express.raw
   const sigHeader = SIGNATURE_HEADERS.map(h => req.headers[h]).find(Boolean);
 
   const sig = verifyWebhookSignature(raw, sigHeader);
   if (!sig.ok) {
-    console.warn('[gcapay webhook] rejected:', sig.reason);
+    console.warn('[psp webhook] rejected:', sig.reason);
     return res.status(401).json({ error: 'invalid signature' });
   }
-  if (!sig.verified) console.warn('[gcapay webhook] no secret configured — accepting unverified (set GCAPAY_WEBHOOK_SECRET)');
+  if (!sig.verified) console.warn('[psp webhook] no secret configured — accepting unverified (set PSP_WEBHOOK_SECRET)');
 
   let evt;
   try { evt = JSON.parse(Buffer.isBuffer(raw) ? raw.toString('utf8') : String(raw)); }
@@ -70,7 +70,7 @@ router.post('/gcapay', async (req, res) => {
     .insert({ event_id: String(e.eventId), type: e.type, reference: e.reference ? String(e.reference) : null, payload: evt });
   if (insErr) {
     if (insErr.code === '23505') return res.json({ received: true, duplicate: true });
-    console.error('[gcapay webhook] store error:', insErr.message);
+    console.error('[psp webhook] store error:', insErr.message);
     // fall through and still try to process
   }
 
@@ -97,17 +97,17 @@ router.post('/gcapay', async (req, res) => {
       return res.json({ received: true, applied: 'disbursement', status });
     }
 
-    // Unhandled event type — acknowledged so GCA Pay stops retrying
+    // Unhandled event type — acknowledged so the payment provider stops retrying
     return res.json({ received: true, ignored: e.type || 'unknown' });
   } catch (err) {
-    console.error('[gcapay webhook] processing error:', err.message);
+    console.error('[psp webhook] processing error:', err.message);
     // 200 so the provider doesn't hammer retries on an app-side data issue; we have the
     // event stored (processed=false) for manual replay/reconciliation.
     return res.json({ received: true, deferred: true, reason: err.message });
   }
 });
 
-// Simple health for the webhook path (useful when giving GCA Pay the URL)
-router.get('/gcapay', (req, res) => res.json({ ok: true, endpoint: 'gcapay-webhook' }));
+// Simple health for the webhook path (useful when giving the payment provider the URL)
+router.get('/psp', (req, res) => res.json({ ok: true, endpoint: 'psp-webhook' }));
 
 module.exports = router;

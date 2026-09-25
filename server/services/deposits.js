@@ -2,10 +2,10 @@
  * Incoming-collection handler.
  *
  * When money is collected into a Dusco number — whether triggered in-app or pushed to us
- * by GCA Pay via webhook — this is the single place that applies it: compute the
+ * by the payment provider via webhook — this is the single place that applies it: compute the
  * cross-network fee, split the net across the user's bahashas, write the ledger
  * transactions, and notify. Both `routes/transactions.js` (in-app) and
- * `routes/webhooks.js` (GCA Pay callback) call this so the behaviour is identical.
+ * `routes/webhooks.js` (the payment provider callback) call this so the behaviour is identical.
  */
 
 const { supabase } = require('../db/database');

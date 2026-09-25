@@ -1,18 +1,22 @@
 /**
- * GCA Pay Adapter
+ * Payment service provider (PSP) adapter.
  *
- * Makes REAL calls to GCA Pay when credentials are configured; otherwise falls back to
+ * Deliberately provider-agnostic: no partner is named anywhere in this file.
+ * Point PSP_BASE_URL at whichever provider is signed first and adjust the
+ * field names in the mapping comments below; nothing else needs to change.
+ *
+ * Makes REAL calls to the PSP when credentials are configured; otherwise falls back to
  * mock responses so the demo keeps working with no keys. Once you receive sandbox docs,
  * the only things to confirm/adjust are: the endpoint PATHS, the AUTH scheme, and the
  * webhook SIGNATURE scheme (all isolated below and env-driven).
  *
  * Env (set in Render / .env):
- *   GCAPAY_BASE_URL        e.g. https://sandbox.gca-pay.com/api/v1
- *   GCAPAY_API_KEY         API key / client id           (Bearer auth)
- *   GCAPAY_SECRET          shared secret for request HMAC (X-Signature)
- *   GCAPAY_WEBHOOK_SECRET  secret GCA Pay signs webhooks with
- *   GCAPAY_MOCK=true       force mock even if keys exist
- *   GCAPAY_PATH_COLLECT / _DISBURSE / _BULK / _STATUS   (override default paths)
+ *   PSP_BASE_URL        e.g. https://sandbox.your-psp.example/api/v1
+ *   PSP_API_KEY         API key / client id           (Bearer auth)
+ *   PSP_SECRET          shared secret for request HMAC (X-Signature)
+ *   PSP_WEBHOOK_SECRET  secret the PSP signs webhooks with
+ *   PSP_MOCK=true       force mock even if keys exist
+ *   PSP_PATH_COLLECT / _DISBURSE / _BULK / _STATUS   (override default paths)
  *
  * Endpoints (defaults — confirm at meeting):
  *   POST {COLLECT}   collections / C2B      → collectFromMobile()
@@ -23,17 +27,17 @@
 
 const crypto = require('crypto');
 
-const BASE = process.env.GCAPAY_BASE_URL || '';
-const API_KEY = process.env.GCAPAY_API_KEY || '';
-const SECRET = process.env.GCAPAY_SECRET || '';
-const WEBHOOK_SECRET = process.env.GCAPAY_WEBHOOK_SECRET || '';
-const FORCE_MOCK = String(process.env.GCAPAY_MOCK || '').toLowerCase() === 'true';
+const BASE = process.env.PSP_BASE_URL || '';
+const API_KEY = process.env.PSP_API_KEY || '';
+const SECRET = process.env.PSP_SECRET || '';
+const WEBHOOK_SECRET = process.env.PSP_WEBHOOK_SECRET || '';
+const FORCE_MOCK = String(process.env.PSP_MOCK || '').toLowerCase() === 'true';
 
 const PATHS = {
-  collect: process.env.GCAPAY_PATH_COLLECT || '/collections',
-  disburse: process.env.GCAPAY_PATH_DISBURSE || '/disbursements',
-  bulk: process.env.GCAPAY_PATH_BULK || '/bulk-payouts',
-  status: process.env.GCAPAY_PATH_STATUS || '/transactions',
+  collect: process.env.PSP_PATH_COLLECT || '/collections',
+  disburse: process.env.PSP_PATH_DISBURSE || '/disbursements',
+  bulk: process.env.PSP_PATH_BULK || '/bulk-payouts',
+  status: process.env.PSP_PATH_STATUS || '/transactions',
 };
 
 /** Live only when we have a base URL + key and aren't forcing mock. */
@@ -41,7 +45,7 @@ function isLive() {
   return !!BASE && !!API_KEY && !FORCE_MOCK;
 }
 
-function newRef(prefix = 'GCA') {
+function newRef(prefix = 'PSP') {
   return `${prefix}-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 }
 
@@ -55,7 +59,7 @@ async function call(method, path, body) {
   const payload = body ? JSON.stringify(body) : undefined;
   const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${API_KEY}` };
   const signature = payload ? sign(payload) : undefined;
-  if (signature) headers['X-Signature'] = signature; // confirm header name with GCA Pay
+  if (signature) headers['X-Signature'] = signature; // confirm header name with the PSP
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 20000);
@@ -65,7 +69,7 @@ async function call(method, path, body) {
     let data;
     try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
     if (!res.ok) {
-      const err = new Error(data?.message || `GCA Pay ${res.status} on ${path}`);
+      const err = new Error(data?.message || `PSP ${res.status} on ${path}`);
       err.status = res.status; err.body = data;
       throw err;
     }
@@ -80,7 +84,7 @@ async function call(method, path, body) {
 async function collectFromMobile({ amount, source_network, source_phone, reference, dusco_number }) {
   const ref = reference || newRef('COL');
   if (isLive()) {
-    // Map fields to GCA Pay's collection schema when you get the docs.
+    // Map fields to the PSP's collection schema when you get the docs.
     const data = await call('POST', PATHS.collect, {
       amount, currency: 'TZS', network: source_network, phone: source_phone,
       account_reference: dusco_number, reference: ref,
@@ -156,9 +160,9 @@ function mock(prefix, network) {
 // ── Webhook signature verification ────────────────────────────────────────
 
 /**
- * Verify a GCA Pay webhook. Pass the RAW request body (Buffer/string) and the signature
- * header value. Uses HMAC-SHA256 with GCAPAY_WEBHOOK_SECRET — confirm the algorithm and
- * header name with GCA Pay and adjust here only.
+ * Verify a PSP webhook. Pass the RAW request body (Buffer/string) and the signature
+ * header value. Uses HMAC-SHA256 with PSP_WEBHOOK_SECRET — confirm the algorithm and
+ * header name with the PSP and adjust here only.
  * Returns true if valid, or true when no secret is configured (demo mode — logged by caller).
  */
 function verifyWebhookSignature(rawBody, signatureHeader) {
