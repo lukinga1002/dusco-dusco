@@ -9,10 +9,14 @@ export default function DashboardWallets({ wallets }) {
   const bahashas = wallets.bahashas || [];
   const allocation = bahashas.reduce((sum, item) => sum + Number(item.percentage || 0), 0);
   return <div className="space-y-7">
-    <section className="rounded-3xl border bg-card p-5 sm:p-7 shadow-sm" aria-label="Savings balance">
-      <div className="mb-4 flex items-center justify-between"><p className="text-sm text-muted-foreground">Total savings</p><ShieldCheck className="h-5 w-5 text-primary" /></div>
-      <PrivacyBalance amount={wallets.totalBalance} />
-      <p className="mt-4 text-xs text-muted-foreground">Hidden by default. Tap the eye to reveal your balance.</p>
+    <section className="relative overflow-hidden rounded-3xl border bg-card p-5 sm:p-7 shadow-sm" aria-label="Savings balance">
+      <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-dusco-gold-soft/70 blur-2xl" />
+      <div className="relative mb-4 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" /><p className="text-sm font-medium text-muted-foreground">Total savings</p></div>
+        <span className="rounded-full bg-dusco-sand px-2.5 py-1 text-xs font-medium text-dusco-ink-soft">{bahashas.length} {bahashas.length === 1 ? "bahasha" : "bahashas"}</span>
+      </div>
+      <PrivacyBalance amount={wallets.totalBalance} size="xl" />
+      <p className="relative mt-4 text-xs text-muted-foreground">Hidden by default. Tap the eye to reveal your balance.</p>
       <div className="mt-5 grid grid-cols-2 gap-3"><Button asChild className="min-h-12 w-full gap-2"><Link to="/app/add-money"><Plus className="h-4 w-4" />Add Money</Link></Button><Button asChild className="min-h-12 w-full gap-2"><Link to="/app/send"><ArrowUpRight className="h-4 w-4" />Send</Link></Button></div>
     </section>
     <section id="bahashas" className="scroll-mt-24">
