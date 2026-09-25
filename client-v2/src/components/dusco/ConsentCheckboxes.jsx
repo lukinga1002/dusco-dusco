@@ -1,8 +1,10 @@
 import React from "react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/lib/i18n";
 
 // Unbundled consent checkboxes — not pre-ticked, separate, explicit.
 export default function ConsentCheckboxes({ consents, onChange, errors }) {
+  const t = useT();
   const set = (key, value) => onChange({ ...consents, [key]: value });
 
   return (
@@ -11,20 +13,20 @@ export default function ConsentCheckboxes({ consents, onChange, errors }) {
         checked={consents.operate}
         onChange={(v) => set("operate", v)}
         error={errors?.operate}
-        title="I consent to Dusco processing my financial and transaction data to operate my savings account."
-        desc="Required to run the service — splitting deposits, showing balances, and recording transactions."
+        title={t("auth.consent.operate")}
+        desc={t("auth.consent.operateHelp")}
         required
       />
       <ConsentRow
         checked={consents.marketing}
         onChange={(v) => set("marketing", v)}
         error={errors?.marketing}
-        title="Send me occasional product updates and savings tips."
-        desc="Optional. You can withdraw this any time in Settings."
+        title={t("auth.consent.marketing")}
+        desc={t("auth.consent.marketingHelp")}
       />
       <p className="text-xs text-dusco-ink-mute px-1">
-        You can review how your data is used in our{" "}
-        <a href="/privacy" className="underline text-dusco-ink hover:text-dusco-red">Privacy Notice</a>.
+        {t("auth.consent.reviewPrefix")}{" "}
+        <a href="/privacy" className="underline text-dusco-ink hover:text-dusco-red">{t("auth.consent.reviewLink")}</a>.
       </p>
     </div>
   );

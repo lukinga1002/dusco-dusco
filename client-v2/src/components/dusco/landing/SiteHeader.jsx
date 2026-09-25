@@ -1,7 +1,9 @@
+import { useT } from "@/lib/i18n";
 import React from "react";
 import { Link } from "react-router-dom";
 
 export default function SiteHeader() {
+  const t = useT();
   return (
     <header className="sticky top-0 z-40 bg-dusco-ink/85 backdrop-blur-md border-b border-white/10">
       <div className="max-w-5xl mx-auto px-5 h-16 flex items-center justify-between">
@@ -10,8 +12,8 @@ export default function SiteHeader() {
           <span className="font-display font-semibold text-lg text-white">Dusco</span>
         </Link>
         <div className="flex items-center gap-2">
-          <Link to="/login" className="px-4 py-2 text-sm font-medium text-white/75 hover:text-white transition-colors">Log in</Link>
-          <Link to="/register" className="px-4 py-2 rounded-xl bg-dusco-gold text-white text-sm font-medium hover:bg-dusco-gold/90 transition-colors">Get started</Link>
+          <Link to="/login" className="px-4 py-2 text-sm font-medium text-white/75 hover:text-white transition-colors">{t("common.login")}</Link>
+          <Link to="/register" className="px-4 py-2 rounded-xl bg-dusco-gold text-white text-sm font-medium hover:bg-dusco-gold/90 transition-colors">{t("common.getStarted")}</Link>
         </div>
       </div>
     </header>

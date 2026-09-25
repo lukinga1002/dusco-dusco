@@ -5,9 +5,12 @@ import ConsentCheckboxes from "@/components/dusco/ConsentCheckboxes";
 import { useColdStartMessage } from "@/components/dusco/ColdStartLoader";
 import { api } from "@/lib/duscoApi";
 import { isValidTzPhone } from "@/lib/duscoFormat";
+import { useLanguage } from "@/lib/i18n";
+import LanguagePicker from "@/components/dusco/LanguagePicker";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { language, setLanguage, t } = useLanguage();
   const [form, setForm] = useState({ name: "", phone: "", password: "" });
   const [consents, setConsents] = useState({ operate: false, marketing: false });
   const [errors, setErrors] = useState({});
@@ -19,10 +22,10 @@ export default function Register() {
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim()) e.name = "Enter your name";
-    if (!isValidTzPhone(form.phone)) e.phone = "Use a Tanzanian number, e.g. 0712345678";
-    if (form.password.length < 6) e.password = "At least 6 characters";
-    if (!consents.operate) e.operate = "We need this to run your account";
+    if (!form.name.trim()) e.name = t("auth.register.error.name");
+    if (!isValidTzPhone(form.phone)) e.phone = t("auth.register.error.phone");
+    if (form.password.length < 6) e.password = t("auth.register.error.password");
+    if (!consents.operate) e.operate = t("auth.consent.error.operate");
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -41,6 +44,7 @@ export default function Register() {
         name: form.name.trim(),
         phone: form.phone.trim(),
         password: form.password,
+        language,
         consents: [
           { purpose: "service_operation", granted: true },
           { purpose: "marketing", granted: !!consents.marketing },
@@ -58,21 +62,27 @@ export default function Register() {
 
   return (
     <AuthShell
-      title="Open your Dusco account"
-      subtitle="Get a Dusco number and set up your savings envelopes."
-      footer={<>Already have an account? <Link to="/login" className="text-dusco-red font-medium">Log in</Link></>}
+      title={t("auth.register.title")}
+      subtitle={t("auth.register.subtitle")}
+      footer={<>{t("auth.register.haveAccount")} <Link to="/login" className="text-dusco-red font-medium">{t("common.login")}</Link></>}
     >
       <form onSubmit={submit} className="space-y-4">
-        <Field label="Full name" error={errors.name}>
+        <div>
+          <p className="text-sm font-medium text-dusco-ink mb-2">{t("auth.register.languageLabel")}</p>
+          <LanguagePicker value={language} onChange={setLanguage} ariaLabel={t("auth.register.languageLabel")} />
+          <p className="text-xs text-dusco-ink-mute mt-1.5">{t("auth.register.languageHelp")}</p>
+        </div>
+
+        <Field label={t("auth.register.name")} error={errors.name}>
           <input
             value={form.name}
             onChange={(e) => set("name", e.target.value)}
             className="auth-input"
-            placeholder="Amani Mushi"
+            placeholder={t("auth.register.namePlaceholder")}
             autoComplete="name"
           />
         </Field>
-        <Field label="Phone number" error={errors.phone}>
+        <Field label={t("auth.register.phone")} error={errors.phone}>
           <input
             value={form.phone}
             onChange={(e) => set("phone", e.target.value)}
@@ -82,19 +92,19 @@ export default function Register() {
             autoComplete="tel"
           />
         </Field>
-        <Field label="Password" error={errors.password}>
+        <Field label={t("auth.register.password")} error={errors.password}>
           <input
             type="password"
             value={form.password}
             onChange={(e) => set("password", e.target.value)}
             className="auth-input"
-            placeholder="At least 6 characters"
+            placeholder={t("auth.register.passwordPlaceholder")}
             autoComplete="new-password"
           />
         </Field>
 
         <div className="pt-1">
-          <p className="text-sm font-medium text-dusco-ink mb-2">Your consent</p>
+          <p className="text-sm font-medium text-dusco-ink mb-2">{t("auth.consent.heading")}</p>
           <ConsentCheckboxes consents={consents} onChange={setConsents} errors={errors} />
         </div>
 
@@ -105,7 +115,7 @@ export default function Register() {
           disabled={loading}
           className="w-full py-3.5 rounded-2xl bg-dusco-red text-white font-medium hover:bg-dusco-red-dark disabled:opacity-60 transition-colors"
         >
-          {loading ? (slow ? "Waking up secure servers…" : "Creating account…") : "Create account"}
+          {loading ? (slow ? t("auth.login.waking") : "…") : t("auth.register.submit")}
         </button>
       </form>
       <style>{`

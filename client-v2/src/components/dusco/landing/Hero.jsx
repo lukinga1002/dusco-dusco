@@ -1,9 +1,11 @@
+import { useT } from "@/lib/i18n";
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import HeroVisual from "./HeroVisual";
 
 export default function Hero() {
+  const t = useT();
   return (
     <section className="relative overflow-hidden bg-dusco-ink">
       {/* ambient glows */}
@@ -12,25 +14,24 @@ export default function Hero() {
       <div className="relative max-w-5xl mx-auto px-5 pt-16 pb-24 grid md:grid-cols-2 gap-12 items-center">
         <div>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-xs font-medium text-white/80">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Operated by Larson Consulting
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> {t("landing.operatedBy")}
           </span>
           <h1 className="font-display text-4xl sm:text-5xl font-semibold leading-[1.05] tracking-tight mt-5 text-white">
-            Your Saving,<br />
-            <span className="text-dusco-gold-soft">Simplified.</span>
+            {t("landing.hero.title1")}<br />
+            <span className="text-dusco-gold-soft">{t("landing.hero.title2")}</span>
           </h1>
           <p className="text-white/70 text-lg leading-relaxed mt-5 max-w-md">
-            Take control of your saving with your Dusco number that receives money from any account or
-            wallet and splits it across your saving envelopes, automatically.
+            {t("landing.hero.body")}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 mt-8">
             <Link to="/register" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-dusco-gold text-white font-medium shadow-lg shadow-dusco-gold/25 hover:bg-dusco-gold/90 transition-colors">
-              Get started <ArrowRight className="w-4 h-4" />
+              {t("common.getStarted")} <ArrowRight className="w-4 h-4" />
             </Link>
             <a href="#how" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl border border-white/25 text-white font-medium hover:bg-white/10 transition-colors">
-              See how it works
+              {t("landing.hero.seeHow")}
             </a>
           </div>
-          <p className="text-xs text-white/40 mt-4">Demo environment · simulated money movement · no real funds</p>
+          <p className="text-xs text-white/40 mt-4">{t("landing.hero.demoNote")}</p>
         </div>
         <HeroVisual />
       </div>

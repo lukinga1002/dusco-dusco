@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { api, getToken, setSession, clearSession, getStoredUser } from "@/lib/duscoApi";
+import { useLanguage } from "@/lib/i18n";
 
 const DuscoAuthContext = createContext(null);
 
 export function DuscoAuthProvider({ children }) {
+  const { setLanguage } = useLanguage();
   const [token, setToken] = useState(() => getToken());
   const [user, setUser] = useState(() => getStoredUser());
   const [loading, setLoading] = useState(false);
@@ -15,6 +17,9 @@ export function DuscoAuthProvider({ children }) {
       const me = await api.me();
       setUser(me);
       setSession(getToken(), me);
+      // The account's language wins over whatever this browser last used, so
+      // signing in on a new device shows the language the person chose.
+      if (me?.language) setLanguage(me.language);
       return me;
     } catch (e) {
       // token invalid
@@ -23,7 +28,7 @@ export function DuscoAuthProvider({ children }) {
       setUser(null);
       return null;
     }
-  }, []);
+  }, [setLanguage]);
 
   useEffect(() => {
     if (token && !user) refreshUser();
@@ -35,8 +40,9 @@ export function DuscoAuthProvider({ children }) {
     setSession(res.token, res.user);
     setToken(res.token);
     setUser(res.user);
+    if (res.user?.language) setLanguage(res.user.language);
     return res;
-  }, []);
+  }, [setLanguage]);
 
   const completeOtp = useCallback(async (phone, otp) => {
     const res = await api.verifyOtp({ phone, otp });

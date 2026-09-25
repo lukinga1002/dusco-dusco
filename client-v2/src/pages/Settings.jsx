@@ -8,12 +8,15 @@ import { useDuscoAuth } from "@/lib/DuscoAuthContext";
 import { api } from "@/lib/duscoApi";
 import QueryFeedback from "@/components/dusco/QueryFeedback";
 import ConsentSettings from "@/components/dusco/ConsentSettings";
+import LanguagePicker from "@/components/dusco/LanguagePicker";
+import { useLanguage } from "@/lib/i18n";
 import DownloadMyData from "@/components/dusco/DownloadMyData";
 import DeleteAccount from "@/components/dusco/DeleteAccount";
 import { formatDate } from "@/lib/duscoFormat";
 
 export default function Settings() {
   const { user, logout } = useDuscoAuth();
+  const { language, setLanguage } = useLanguage();
   const navigate = useNavigate();
   const client = useQueryClient();
   const [name, setName] = useState(null);
@@ -35,6 +38,18 @@ export default function Settings() {
       setNotice("Name updated.");
     } catch (err) { setError(err.message); } finally { setSaving(false); }
   };
+  const changeLanguage = async (code) => {
+    if (code === language) return;
+    setLanguage(code);              // immediate, so the UI responds at once
+    setError(""); setNotice("");
+    try {
+      await api.updateProfile({ language: code });   // and on the account, so it follows them
+      await profile.refetch();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const signOut = async () => {
     await client.cancelQueries({ queryKey: ["dusco"] });
     logout();
@@ -57,6 +72,11 @@ export default function Settings() {
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="min-h-11" disabled={saving}>{saving ? "Saving…" : "Save name"}</Button>
         </form>
+      </section>
+      <section className="space-y-3 rounded-2xl border bg-card p-5">
+        <h2 className="font-display text-lg font-semibold">Language</h2>
+        <p className="text-sm text-muted-foreground">Saved to your account, so it follows you to any device.</p>
+        <LanguagePicker value={language} onChange={changeLanguage} ariaLabel="Language" />
       </section>
       <section className="space-y-3 rounded-2xl border bg-card p-5">
         <h2 className="font-display text-lg font-semibold">Your consent</h2>

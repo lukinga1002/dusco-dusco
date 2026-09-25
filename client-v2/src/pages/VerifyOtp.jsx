@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthShell from "@/components/dusco/AuthShell";
+import { useT } from "@/lib/i18n";
 import { useColdStartMessage } from "@/components/dusco/ColdStartLoader";
 import { useDuscoAuth } from "@/lib/DuscoAuthContext";
 
 export default function VerifyOtp() {
+  const t = useT();
   const location = useLocation();
   const navigate = useNavigate();
   const { completeOtp } = useDuscoAuth();
@@ -42,13 +44,13 @@ export default function VerifyOtp() {
     e?.preventDefault();
     setError("");
     const otp = digits.join("");
-    if (otp.length !== 4) { setError("Enter the 4-digit code"); return; }
+    if (otp.length !== 4) { setError(t("auth.otp.error.length")); return; }
     setLoading(true);
     try {
       await completeOtp(phone, otp);
       navigate("/app", { replace: true });
     } catch (err) {
-      setError(err.message || "Could not verify. Try again.");
+      setError(err.message || t("auth.otp.error.failed"));
     } finally {
       setLoading(false);
     }
@@ -56,24 +58,20 @@ export default function VerifyOtp() {
 
   return (
     <AuthShell
-      title="Verify your number"
-      subtitle={
-        <>
-          We sent a code to <span className="font-medium text-dusco-ink">{phone || "your phone"}</span>.
-        </>
-      }
-      footer={<>Wrong number? <Link to="/register" className="text-dusco-red font-medium">Start over</Link></>}
+      title={t("auth.otp.title")}
+      subtitle={t("auth.otp.sentTo", { phone: phone || "" })}
+      footer={<>{t("auth.otp.wrongNumber")} <Link to="/register" className="text-dusco-red font-medium">{t("auth.otp.startOver")}</Link></>}
     >
       {duscoNumber && (
         <div className="mb-6 rounded-2xl bg-dusco-ink text-white p-5 text-center">
-          <p className="text-xs uppercase tracking-wider text-white/60">Your Dusco number</p>
+          <p className="text-xs uppercase tracking-wider text-white/60">{t("auth.otp.yourNumber")}</p>
           <p className="font-display text-3xl font-semibold mt-1 tracking-wide">{duscoNumber}</p>
-          <p className="text-xs text-white/60 mt-2">This is your identity in Dusco. Share it to receive money.</p>
+          <p className="text-xs text-white/60 mt-2">{t("auth.otp.shareNote")}</p>
         </div>
       )}
 
       <div className="rounded-xl bg-dusco-gold-soft border border-dusco-gold/30 px-3.5 py-2.5 mb-6 text-xs text-dusco-ink-soft">
-        <span className="font-medium text-dusco-gold">Demo:</span> OTP is simulated — enter any 4 digits to continue.
+        {t("auth.otp.demoNote")}
       </div>
 
       <form onSubmit={submit}>
@@ -99,7 +97,7 @@ export default function VerifyOtp() {
           disabled={loading}
           className="w-full py-3.5 rounded-2xl bg-dusco-red text-white font-medium hover:bg-dusco-red-dark disabled:opacity-60 transition-colors"
         >
-          {loading ? (slow ? "Waking up secure servers…" : "Verifying…") : "Verify & continue"}
+          {loading ? (slow ? t("auth.login.waking") : "…") : t("auth.otp.submit")}
         </button>
       </form>
     </AuthShell>

@@ -1,3 +1,4 @@
+import { useT } from "@/lib/i18n";
 import React from "react";
 import { motion } from "framer-motion";
 
@@ -8,6 +9,7 @@ const ENVELOPES = [
 ];
 
 export default function HeroVisual() {
+  const t = useT();
   return (
     <div className="relative h-80 sm:h-96">
       {/* incoming */}
@@ -17,7 +19,7 @@ export default function HeroVisual() {
         className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-2xl bg-white text-dusco-ink shadow-xl z-10"
         style={{ boxShadow: "0 0 50px -12px hsl(var(--brass) / 0.55)" }}
       >
-        <p className="text-[10px] opacity-60 uppercase tracking-wider">Sent to DUS-A3K9M2</p>
+        <p className="text-[10px] opacity-60 uppercase tracking-wider">{t("landing.hero.sentTo", { number: "DUS-A3K9M2" })}</p>
         <p className="font-display text-xl font-semibold tabular-nums">TZS 500,000</p>
       </motion.div>
       {/* connector lines */}

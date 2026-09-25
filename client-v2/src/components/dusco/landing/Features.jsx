@@ -1,19 +1,22 @@
 import React from "react";
 import { Split, Wallet, Users, Lock, Bell, Target } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
+// Icons and keys at module scope; text resolved inside the component.
 const FEATURES = [
-  { icon: Split, t: "Automatic splitting", d: "Every deposit divides across your envelopes by the percentages you set." },
-  { icon: Wallet, t: "Receive from any network", d: "M-Pesa, Airtel, Tigo, banks — one number accepts them all." },
-  { icon: Target, t: "Goals & locks", d: "Set a target on any envelope, or lock it until a date to resist temptation." },
-  { icon: Users, t: "Group savings", d: "Run a kikoba with a group number, member ledger, and shares + social fund." },
-  { icon: Lock, t: "Private by default", d: "Balances are blurred until you tap to reveal — safe in shared spaces." },
-  { icon: Bell, t: "Transparent fees", d: "Every fee is shown before money moves. No surprises, ever." },
+  { icon: Split, t: "landing.features.1.title", d: "landing.features.1.body" },
+  { icon: Wallet, t: "landing.features.2.title", d: "landing.features.2.body" },
+  { icon: Target, t: "landing.features.3.title", d: "landing.features.3.body" },
+  { icon: Users, t: "landing.features.4.title", d: "landing.features.4.body" },
+  { icon: Lock, t: "landing.features.5.title", d: "landing.features.5.body" },
+  { icon: Bell, t: "landing.features.6.title", d: "landing.features.6.body" },
 ];
 
 export default function Features() {
+  const t = useT();
   return (
     <section className="max-w-3xl mx-auto px-5 py-16">
-      <h2 className="font-display text-3xl font-semibold text-center">Built for how you save</h2>
+      <h2 className="font-display text-3xl font-semibold text-center">{t("landing.features.title")}</h2>
       <div className="grid sm:grid-cols-2 gap-4 mt-10">
         {FEATURES.map((f, i) => {
           const Icon = f.icon;
@@ -23,8 +26,8 @@ export default function Features() {
                 <Icon className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="font-display font-semibold">{f.t}</p>
-                <p className="text-sm text-dusco-ink-soft mt-1 leading-relaxed">{f.d}</p>
+                <p className="font-display font-semibold">{t(f.t)}</p>
+                <p className="text-sm text-dusco-ink-soft mt-1 leading-relaxed">{t(f.d)}</p>
               </div>
             </div>
           );
