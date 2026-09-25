@@ -15,12 +15,12 @@ export default function Hero() {
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Operated by Larson Consulting
           </span>
           <h1 className="font-display text-4xl sm:text-5xl font-semibold leading-[1.05] tracking-tight mt-5 text-white">
-            One number.<br />
-            <span className="text-dusco-gold-soft">Many envelopes.</span>
+            Your Saving,<br />
+            <span className="text-dusco-gold-soft">Simplified.</span>
           </h1>
           <p className="text-white/70 text-lg leading-relaxed mt-5 max-w-md">
-            Tanzanians already save by purpose — school fees, the farm, emergencies. Dusco gives you one number.
-            Money sent to it splits itself across your savings envelopes, automatically.
+            Take control of your saving with your Dusco number that receives money from any account or
+            wallet and splits it across your saving envelopes, automatically.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 mt-8">
             <Link to="/register" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-dusco-gold text-white font-medium shadow-lg shadow-dusco-gold/25 hover:bg-dusco-gold/90 transition-colors">
