@@ -1,12 +1,12 @@
 /**
  * Payment Service Interface
  *
- * Clean abstraction over the payment provider (GCA Pay).
+ * Clean abstraction over the payment service provider (PSP).
  * All functions return mock responses with simulated 1-2s delays.
- * Replace mock internals with real gcapay.js calls when integrating.
+ * Replace mock internals with real psp.js calls when integrating.
  */
 
-const gcapay = require('./gcapay');
+const psp = require('./psp');
 const { SETTLEMENT_NETWORK } = require('./payment.types');
 
 function delay(ms) {
@@ -17,7 +17,7 @@ function delay(ms) {
  * Collect a payment from an external source into a Dusco number.
  * Triggers deposit + auto-split into bahashas.
  *
- * Maps to: GCA Pay POST /api/v1/collections
+ * Maps to: PSP POST /api/v1/collections
  */
 async function collectPayment({ amount, source_network, source_phone, dusco_number }) {
   await delay(800 + Math.random() * 700); // Simulate 0.8-1.5s network delay
@@ -26,7 +26,7 @@ async function collectPayment({ amount, source_network, source_phone, dusco_numb
   const crossNetworkFee = isSameNetwork ? 0 : Math.max(500, Math.round(amount * 0.01));
   const netAmount = amount - crossNetworkFee;
 
-  const result = await gcapay.collectFromMobile({ amount, source_network, source_phone });
+  const result = await psp.collectFromMobile({ amount, source_network, source_phone });
 
   return {
     success: true,
@@ -45,12 +45,12 @@ async function collectPayment({ amount, source_network, source_phone, dusco_numb
 /**
  * Disburse funds from a bahasha to an external phone/bank.
  *
- * Maps to: GCA Pay POST /api/v1/disbursements
+ * Maps to: PSP POST /api/v1/disbursements
  */
 async function disburseFunds({ amount, destination_network, destination_phone, bahasha_id }) {
   await delay(800 + Math.random() * 700);
 
-  const result = await gcapay.disburseToMobile({ amount, destination_network, destination_phone });
+  const result = await psp.disburseToMobile({ amount, destination_network, destination_phone });
 
   return {
     success: true,
@@ -67,12 +67,12 @@ async function disburseFunds({ amount, destination_network, destination_phone, b
 /**
  * Distribute dividends to multiple users in bulk.
  *
- * Maps to: GCA Pay POST /api/v1/bulk-payouts
+ * Maps to: PSP POST /api/v1/bulk-payouts
  */
 async function bulkPayout({ payouts }) {
   await delay(1500 + Math.random() * 1000);
 
-  const result = await gcapay.bulkDisbursement({ payouts });
+  const result = await psp.bulkDisbursement({ payouts });
 
   return {
     success: true,
@@ -86,12 +86,12 @@ async function bulkPayout({ payouts }) {
 /**
  * Check the status of a previous transaction.
  *
- * Maps to: GCA Pay GET /api/v1/transactions/:id
+ * Maps to: PSP GET /api/v1/transactions/:id
  */
 async function getTransactionStatus(transaction_id) {
   await delay(300);
 
-  const result = await gcapay.getStatus(transaction_id);
+  const result = await psp.getStatus(transaction_id);
 
   return {
     transaction_id: result.transaction_id,

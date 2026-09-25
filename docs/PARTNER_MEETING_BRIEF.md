@@ -1,13 +1,13 @@
-# GCA Pay × Dusco — Sandbox Meeting Brief
+# the payment partner × Dusco — Sandbox Meeting Brief
 
 **Goal of the meeting:** walk out with **sandbox credentials** and clear answers on the
 four integration points Dusco depends on, plus the one product question that makes or
 breaks Dusco's core feature.
 
 Dusco's payment layer is already abstracted behind four functions (`server/services/payment.js`),
-so integrating GCA Pay is a "fill in the adapter" job — not a rewrite. Map each to their API:
+so integrating the payment partner is a "fill in the adapter" job — not a rewrite. Map each to their API:
 
-| Dusco function | What it does | GCA Pay capability to confirm |
+| Dusco function | What it does | the payment partner capability to confirm |
 |---|---|---|
 | `collectPayment()` | Pull money in → split into bahashas | **Collections / C2B** |
 | `disburseFunds()` | Pay a bahasha out to phone/bank | **Disbursements / B2C** |
@@ -19,7 +19,7 @@ so integrating GCA Pay is a "fill in the adapter" job — not a rewrite. Map eac
 ## 🔑 The make-or-break question (ask this first)
 
 Dusco's signature feature is: *"a user sends money to their Dusco number `DUS-XXXXXX`
-from ANY bank/mobile-money app, and it auto-splits."* For that to be real, GCA Pay must let
+from ANY bank/mobile-money app, and it auto-splits."* For that to be real, the payment partner must let
 us **address each user uniquely on the way in**. Ask:
 
 > **"Can you give each of our users a unique collection identifier — a virtual account
@@ -65,12 +65,12 @@ Their answer shapes the whole onboarding/UX:
 11. **KYC & onboarding** to move from sandbox → production: what business documents
     (registration, TIN, licences), and the **typical timeline**.
 12. **Pricing tiers / minimums / monthly fees.**
-13. Whether Dusco needs any **BoT / payment licence** or operates under GCA Pay's licence as
+13. Whether Dusco needs any **BoT / payment licence** or operates under the partner's licence as
     a technical integrator (important — clarify the regulatory umbrella).
 
 ## Compliance (Tanzania PDPA, Cap. 44) — raise it, it builds trust
 
-14. Request a **Data Processing Agreement** — under the Act, GCA Pay is a *data processor*
+14. Request a **Data Processing Agreement** — under the Act, the payment partner is a *data processor*
     handling sensitive financial-transaction data on Dusco's behalf (s.27(4)).
 15. **Data residency**: are transactions stored in Tanzania / which region? (Helps Dusco's
     own transborder position.)
@@ -85,12 +85,12 @@ Their answer shapes the whole onboarding/UX:
   collections model confirmed."*
 
 ## After the meeting — what Dusco's engineering does
-- Drop the real calls into `server/services/gcapay.js` (the adapter already documents the
+- Drop the real calls into `server/services/psp.js` (the adapter already documents the
   intended endpoints). `payment.js` stays unchanged.
-- Add a webhook route (`POST /api/webhooks/gcapay`) with signature verification → on a
+- Add a webhook route (`POST /api/webhooks/psp`) with signature verification → on a
   confirmed collection, run the existing split logic.
 - Add idempotency keys + status-reconciliation job.
-- Sign the DPA; record GCA Pay as a processor for PDPC registration.
+- Sign the DPA; record the payment partner as a processor for PDPC registration.
 
 ---
 

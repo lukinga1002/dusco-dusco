@@ -38,16 +38,16 @@ app.use('/api/account', accountRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  const { isLive } = require('./services/gcapay');
+  const { isLive } = require('./services/psp');
   res.json({
     status: 'ok', service: 'Dusco Dusco API', database: 'supabase-postgresql',
-    gcapay: isLive() ? 'live' : 'mock', timestamp: new Date().toISOString(),
+    psp: isLive() ? 'live' : 'mock', timestamp: new Date().toISOString(),
   });
 });
 
 app.listen(PORT, () => {
   console.log(`Dusco Dusco API running on http://localhost:${PORT}`);
   console.log(`Database: Supabase PostgreSQL`);
-  const { isLive } = require('./services/gcapay');
-  console.log(`GCA Pay: ${isLive() ? 'LIVE (keys configured)' : 'MOCK (no keys)'}`);
+  const { isLive } = require('./services/psp');
+  console.log(`Payment provider: ${isLive() ? 'LIVE (keys configured)' : 'MOCK (no keys)'}`);
 });
