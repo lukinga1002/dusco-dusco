@@ -4,6 +4,7 @@ const { authenticateToken } = require('../middleware/auth');
 const { collectPayment, disburseFunds } = require('../services/payment');
 const { SETTLEMENT_NETWORK } = require('../services/payment.types');
 const { authorizeWithdrawal, releaseAllowance } = require('../services/kyc');
+const { withIdempotency } = require('../services/idempotency');
 const { isLive } = require('../services/psp');
 
 const router = express.Router();
@@ -17,7 +18,7 @@ function calculateWithdrawalFee(amount, heldSince) {
   return Math.max(500, Math.min(Math.round(amount * 0.01), 5000));
 }
 
-router.post('/deposit', async (req, res) => {
+router.post('/deposit', withIdempotency('transactions.deposit'), async (req, res) => {
   try {
     // This endpoint CREDITS a bahasha from an amount supplied by the caller.
     // Nothing here proves a payment was actually made, so it is a simulator and
@@ -83,7 +84,7 @@ router.post('/deposit', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-router.post('/withdraw', async (req, res) => {
+router.post('/withdraw', withIdempotency('transactions.withdraw'), async (req, res) => {
   try {
     const { bahashaId, amount, destinationPhone, destinationNetwork, pin } = req.body;
     if (!bahashaId || !amount || amount <= 0) return res.status(400).json({ error: 'Bahasha ID and positive amount required' });
