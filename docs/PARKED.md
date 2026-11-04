@@ -47,3 +47,28 @@ backend is real — only `useReminders.js` would need rewriting against the Dusc
 
 See `docs/RLS_DESIGN.md` §6. Parked until after the pilot: it means replacing PostgREST with a
 pooled `pg` client and rewriting every query, and Phase 1 already removes the actual exposure.
+
+---
+
+## Kiswahili for the signed-in app — pending
+
+The public landing page and the whole sign-up / sign-in flow are translated
+(English and Kiswahili, `client-v2/src/lib/locales/`). The screens **after**
+sign-in — dashboard, bahashas, add money, send, groups, transactions, settings,
+consent, data export and account deletion — are still English only.
+
+A Kiswahili user therefore meets Kiswahili up to the point they sign in, and
+English after. That is a known gap, not an accident: the language is stored on
+the account and the machinery is in place, so finishing it is a matter of
+extracting the remaining strings into the dictionaries and swapping them for
+`t(...)` calls.
+
+Two things to do when picking it up:
+
+1. `lib/i18n.jsx` already compares every locale against English on startup in
+   development and logs anything missing. Watch that console while working — it
+   is what catches a half-translated screen before a user does.
+2. **Have a native Kiswahili speaker review the wording before the pilot**,
+   especially the financial terms (ada, salio, amana, hisa). The current
+   translation is careful but unreviewed, and this is a product about people's
+   money.

@@ -3,6 +3,8 @@ const { supabase } = require('../db/database');
 const { authenticateToken } = require('../middleware/auth');
 const { collectPayment, disburseFunds } = require('../services/payment');
 const { SETTLEMENT_NETWORK } = require('../services/payment.types');
+const { authorizeWithdrawal, releaseAllowance } = require('../services/kyc');
+const { isLive } = require('../services/psp');
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -17,6 +19,21 @@ function calculateWithdrawalFee(amount, heldSince) {
 
 router.post('/deposit', async (req, res) => {
   try {
+    // This endpoint CREDITS a bahasha from an amount supplied by the caller.
+    // Nothing here proves a payment was actually made, so it is a simulator and
+    // must never be reachable once a real provider is handling money — anyone
+    // could otherwise mint themselves a balance.
+    //
+    // It stays open only while the payment provider is in mock mode. The moment
+    // PSP credentials are configured, this closes by itself. See
+    // docs/SECURITY_REVIEW_2026-11.md.
+    if (isLive()) {
+      return res.status(403).json({
+        error: 'Simulated deposits are disabled. Money must arrive through the payment provider.',
+        code: 'simulation_disabled',
+      });
+    }
+
     const { amount, sourceNetwork, senderPhone, external } = req.body;
     if (!amount || amount <= 0) return res.status(400).json({ error: 'Amount must be positive' });
     if (!sourceNetwork) return res.status(400).json({ error: 'Source network is required' });
@@ -68,7 +85,7 @@ router.post('/deposit', async (req, res) => {
 
 router.post('/withdraw', async (req, res) => {
   try {
-    const { bahashaId, amount, destinationPhone, destinationNetwork } = req.body;
+    const { bahashaId, amount, destinationPhone, destinationNetwork, pin } = req.body;
     if (!bahashaId || !amount || amount <= 0) return res.status(400).json({ error: 'Bahasha ID and positive amount required' });
     if (!destinationPhone || !destinationNetwork) return res.status(400).json({ error: 'Destination phone and network required' });
 
@@ -77,7 +94,22 @@ router.post('/withdraw', async (req, res) => {
     if (bahasha.is_locked && new Date(bahasha.lock_until) > new Date()) {
       return res.status(400).json({ error: `Bahasha locked until ${bahasha.lock_until}. Unlock early with 2% penalty.` });
     }
-    if (amount > bahasha.balance) return res.status(400).json({ error: `Insufficient balance. Available: TZS ${bahasha.balance.toLocaleString()}` });
+
+    // Identity tier, PIN and monthly limit are enforced HERE, where the money
+    // actually moves. A client-side "authorized" answer is not a control: the
+    // previous design let anyone skip all three by calling this endpoint
+    // directly. Also consumes the monthly allowance atomically.
+    try {
+      await authorizeWithdrawal({ userId: req.userId, amount, pin, channel: 'personal' });
+    } catch (gate) {
+      return res.status(gate.statusCode || 403).json({
+        error: gate.message, code: gate.code,
+        ...(gate.tier !== undefined ? { tier: gate.tier } : {}),
+        ...(gate.limits ? { limits: gate.limits } : {}),
+        ...(gate.attemptsLeft !== undefined ? { attemptsLeft: gate.attemptsLeft } : {}),
+        ...(gate.lockedUntil ? { lockedUntil: gate.lockedUntil } : {}),
+      });
+    }
 
     const { data: earliest } = await supabase.from('transactions').select('held_since').eq('bahasha_id', bahashaId).eq('type', 'deposit').not('held_since', 'is', null).order('held_since').limit(1);
     const withdrawalFee = calculateWithdrawalFee(amount, earliest?.[0]?.held_since);
@@ -88,9 +120,38 @@ router.post('/withdraw', async (req, res) => {
     // Fee-inclusive: `amount` leaves the bahasha; the fee is taken out of it,
     // and the recipient receives the remainder.
     const netSent = amount - withdrawalFee;
-    const payment = await disburseFunds({ amount: netSent, destination_network: destinationNetwork, destination_phone: destinationPhone, bahasha_id: bahashaId });
 
-    await supabase.from('bahashas').update({ balance: bahasha.balance - amount }).eq('id', bahashaId);
+    // Debit FIRST, and conditionally. Reading the balance, then paying out, then
+    // writing the new balance let two concurrent withdrawals both pass the check
+    // and overdraw the bahasha — and a crash between paying and writing lost the
+    // record of money that had already left. The `gte` makes the debit succeed
+    // only if the funds are still there, so exactly one of two racing
+    // withdrawals can win.
+    const { data: debited } = await supabase
+      .from('bahashas')
+      .update({ balance: bahasha.balance - amount, updated_at: new Date().toISOString() })
+      .eq('id', bahashaId)
+      .eq('user_id', req.userId)
+      .gte('balance', amount)
+      .select();
+
+    if (!debited || debited.length === 0) {
+      await releaseAllowance(req.userId, amount);
+      return res.status(400).json({ error: `Insufficient balance. Available: TZS ${Math.max(0, bahasha.balance).toLocaleString()}` });
+    }
+
+    let payment;
+    try {
+      payment = await disburseFunds({ amount: netSent, destination_network: destinationNetwork, destination_phone: destinationPhone, bahasha_id: bahashaId });
+    } catch (payErr) {
+      // The payout did not go through, so put the money back and return the
+      // monthly allowance. A provider TIMEOUT is "unknown" rather than failed —
+      // when a real provider is wired up this needs a status query and a held
+      // state, not a blind refund. See docs/SECURITY_REVIEW_2026-11.md.
+      await supabase.from('bahashas').update({ balance: bahasha.balance }).eq('id', bahashaId);
+      await releaseAllowance(req.userId, amount);
+      return res.status(502).json({ error: 'The payout could not be completed. Your money has not been taken.' });
+    }
 
     await supabase.from('transactions').insert({
       user_id: req.userId, bahasha_id: bahashaId, type: 'withdrawal', amount: -amount, fee: withdrawalFee,
