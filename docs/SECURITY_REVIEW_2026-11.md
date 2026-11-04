@@ -114,7 +114,7 @@ idempotency key, then settle or release based on the confirmed result.
 
 ---
 
-### [HIGH] Money is stored as floating point on both backends
+### [HIGH — FIXED 2026-11-04 on the Dusco backend] Money is stored as floating point on both backends
 
 **Location:** Supabase `bahashas.balance`, `transactions.amount`, `transactions.fee` are `real`
 (float4); Base44 `GroupContribution.amount`, `fines_deducted`, `rejesho_allocated`,
@@ -131,7 +131,7 @@ every split.
 
 ---
 
-### [HIGH] No idempotency on any money-moving endpoint
+### [HIGH — FIXED 2026-11-04] No idempotency on any money-moving endpoint
 
 **Location:** deposit, withdraw, group withdraw, group contribution
 
@@ -275,7 +275,20 @@ over-limit and tier checks all behave; a valid withdrawal succeeds; two racing 1
 withdrawals against a 237,050 balance produced exactly one success and no overdraw; and the
 simulator is refused once provider credentials are present.
 
-**Still open and unchanged:** floats for money on both backends, no idempotency keys, the
-non-unique `GroupContribution.payment_reference`, no ledger or double-entry, no reconciliation
-between the two backends, RLS still disabled, and admin tools without maker-checker, MFA or an
-audit trail.
+### Second round, same day
+
+- **Money is now BIGINT** on the Dusco backend (`bahashas.balance`, `transactions.amount`,
+  `transactions.fee`, `dividends.amount`), in whole shillings, with the currency stored
+  alongside. Audited as lossless before converting and totals verified identical afterwards.
+  CHECK constraints now forbid a negative balance or fee at the database, not just in code.
+- **Idempotency** on deposit, withdraw, group withdraw and group contribute, enforced by a
+  UNIQUE (user_id, endpoint, key) constraint, with the original response replayed to a retry
+  and a reused key carrying a different body refused. The client sends one key per transfer
+  attempt. Verified live: a replayed deposit returns the original transaction id and credits
+  once; two concurrent requests with one key credit 50,000 rather than 100,000.
+
+**Still open:** the Base44 side is still floats (`GroupContribution` and friends) and still has
+a non-unique, non-required `payment_reference`; no ledger or double-entry anywhere; no
+reconciliation between the two backends; RLS still disabled pending the service-role key; and
+admin tools without maker-checker, MFA or an audit trail. Idempotency keys are honoured when
+sent but not yet mandatory.
