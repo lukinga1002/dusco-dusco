@@ -1,5 +1,6 @@
 const express = require('express');
 const { supabase } = require('../db/database');
+const ledger = require('../services/ledger');
 const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
@@ -56,7 +57,12 @@ router.put('/:id', async (req, res) => {
       const lockEnd = new Date(bahasha.lock_until);
       if (now < lockEnd) {
         const penalty = Math.round(bahasha.balance * 0.02);
-        await supabase.from('bahashas').update({ is_locked: false, lock_until: null, balance: bahasha.balance - penalty }).eq('id', bahasha.id);
+        await ledger.post({
+          kind: 'penalty', reference: `PEN-${bahasha.id}-${Date.now()}`,
+          description: `Early unlock penalty (2%) on ${bahasha.name}`,
+          lines: ledger.penaltyLines({ bahashaId: bahasha.id, penalty }),
+        });
+        await supabase.from('bahashas').update({ is_locked: false, lock_until: null }).eq('id', bahasha.id);
         await supabase.from('transactions').insert({ user_id: req.userId, bahasha_id: bahasha.id, type: 'penalty', amount: -penalty, fee: penalty, description: `Early unlock penalty (2%) on ${bahasha.name}`, reference: `PEN-${Date.now()}` });
         return res.json({ message: `Bahasha unlocked. Penalty: TZS ${penalty.toLocaleString()}`, penalty, newBalance: bahasha.balance - penalty });
       }
@@ -123,7 +129,11 @@ router.delete('/:id', async (req, res) => {
       const { data: target } = await supabase.from('bahashas').select('*').eq('id', transferToId).eq('user_id', req.userId).single();
       if (!target) return res.status(404).json({ error: 'Transfer target not found' });
 
-      await supabase.from('bahashas').update({ balance: target.balance + bahasha.balance }).eq('id', transferToId);
+      await ledger.post({
+        kind: 'transfer', reference: `TRF-${bahasha.id}-${Date.now()}`,
+        description: `Balance transfer from deleted bahasha "${bahasha.name}"`,
+        lines: ledger.transferLines({ fromBahashaId: bahasha.id, toBahashaId: transferToId, amount: bahasha.balance }),
+      });
       await supabase.from('transactions').insert({ user_id: req.userId, bahasha_id: transferToId, type: 'transfer', amount: bahasha.balance, description: `Balance transfer from deleted bahasha "${bahasha.name}"`, reference: `TRF-${Date.now()}` });
     }
 

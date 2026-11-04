@@ -5,6 +5,7 @@ const { collectPayment, disburseFunds } = require('../services/payment');
 const { SETTLEMENT_NETWORK } = require('../services/payment.types');
 const { authorizeWithdrawal, releaseAllowance } = require('../services/kyc');
 const { withIdempotency } = require('../services/idempotency');
+const ledger = require('../services/ledger');
 const { isLive } = require('../services/psp');
 
 const router = express.Router();
@@ -54,9 +55,20 @@ router.post('/deposit', withIdempotency('transactions.deposit'), async (req, res
     const splitTotal = splits.reduce((s, x) => s + x.amount, 0);
     if (splitTotal !== netAmount && splits.length > 0) splits[0].amount += netAmount - splitTotal;
 
+    // One balanced entry for the whole deposit: the provider owes us the gross,
+    // we owe the savers their splits, and we keep the fee. Posting is what
+    // updates the balances — no balance is written by hand here. If the splits
+    // ever failed to add up to the net, the entry would not balance and this
+    // would fail loudly rather than quietly mislaying money.
+    await ledger.post({
+      kind: 'deposit',
+      reference: `DEP-${payment.transaction_id}`,
+      description: `Deposit via ${sourceNetwork}`,
+      lines: ledger.depositLines({ gross: amount, fee: payment.cross_network_fee, splits }),
+    });
+
     const now = new Date().toISOString();
     for (const split of splits) {
-      await supabase.from('bahashas').update({ balance: bahashas.find(b => b.id === split.bahashaId).balance + split.amount }).eq('id', split.bahashaId);
       await supabase.from('transactions').insert({
         user_id: req.userId, bahasha_id: split.bahashaId, type: 'deposit', amount: split.amount,
         source_network: sourceNetwork, reference: payment.transaction_id,
@@ -122,34 +134,41 @@ router.post('/withdraw', withIdempotency('transactions.withdraw'), async (req, r
     // and the recipient receives the remainder.
     const netSent = amount - withdrawalFee;
 
-    // Debit FIRST, and conditionally. Reading the balance, then paying out, then
-    // writing the new balance let two concurrent withdrawals both pass the check
-    // and overdraw the bahasha — and a crash between paying and writing lost the
-    // record of money that had already left. The `gte` makes the debit succeed
-    // only if the funds are still there, so exactly one of two racing
-    // withdrawals can win.
-    const { data: debited } = await supabase
-      .from('bahashas')
-      .update({ balance: bahasha.balance - amount, updated_at: new Date().toISOString() })
-      .eq('id', bahashaId)
-      .eq('user_id', req.userId)
-      .gte('balance', amount)
-      .select();
-
-    if (!debited || debited.length === 0) {
+    // Debit FIRST, through the ledger. Posting is one Postgres function call,
+    // so the journal and the balance move together, the row lock it takes means
+    // exactly one of two racing withdrawals can win, and an entry that does not
+    // balance is refused outright.
+    const withdrawalRef = `WDR-${bahashaId}-${Date.now()}`;
+    try {
+      await ledger.post({
+        kind: 'withdrawal', reference: withdrawalRef,
+        description: `Sent from ${bahasha.name} to ${destinationPhone} (${destinationNetwork})`,
+        lines: ledger.withdrawalLines({ bahashaId, amount, fee: withdrawalFee }),
+      });
+    } catch (ledgerErr) {
       await releaseAllowance(req.userId, amount);
-      return res.status(400).json({ error: `Insufficient balance. Available: TZS ${Math.max(0, bahasha.balance).toLocaleString()}` });
+      if (ledgerErr.code === 'insufficient_funds') {
+        return res.status(400).json({ error: `Insufficient balance. Available: TZS ${Math.max(0, bahasha.balance).toLocaleString()}` });
+      }
+      throw ledgerErr;
     }
 
     let payment;
     try {
       payment = await disburseFunds({ amount: netSent, destination_network: destinationNetwork, destination_phone: destinationPhone, bahasha_id: bahashaId });
     } catch (payErr) {
-      // The payout did not go through, so put the money back and return the
-      // monthly allowance. A provider TIMEOUT is "unknown" rather than failed —
-      // when a real provider is wired up this needs a status query and a held
-      // state, not a blind refund. See docs/SECURITY_REVIEW_2026-11.md.
-      await supabase.from('bahashas').update({ balance: bahasha.balance }).eq('id', bahashaId);
+      // The payout did not go through, so reverse the entry rather than
+      // overwriting a balance — the journal keeps both the debit and its
+      // reversal, which is what makes the history reconstructable.
+      // A provider TIMEOUT is "unknown" rather than failed: with a real
+      // provider this needs a status query and a held state, not a blind
+      // reversal. See docs/SECURITY_REVIEW_2026-11.md.
+      await ledger.post({
+        kind: 'withdrawal_reversal', reference: `REV-${withdrawalRef}`,
+        description: 'Payout failed — withdrawal reversed',
+        lines: ledger.withdrawalLines({ bahashaId, amount, fee: withdrawalFee })
+          .map(l => ({ ...l, direction: l.direction === 'debit' ? 'credit' : 'debit' })),
+      });
       await releaseAllowance(req.userId, amount);
       return res.status(502).json({ error: 'The payout could not be completed. Your money has not been taken.' });
     }

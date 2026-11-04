@@ -1,0 +1,33 @@
+-- 007_double_entry_ledger.sql — applied to Supabase Postgres on 2026-11-04
+--
+-- Append-only double-entry ledger. See docs/SECURITY_REVIEW_2026-11.md.
+--
+-- Before this, a balance was a mutable field and `transactions` was an event
+-- log, so nothing proved money was conserved: a lost update or a half-finished
+-- operation left a balance wrong with no way to detect it.
+--
+-- Posting happens inside Postgres rather than in the API because the Supabase
+-- client speaks to PostgREST, which cannot wrap several statements in one
+-- transaction. A plpgsql function IS one transaction, so the journal and the
+-- balance derived from it cannot diverge — and the row lock it takes removes
+-- the concurrent-withdrawal race as a side effect.
+--
+-- Tables: ledger_accounts, ledger_entries, ledger_lines
+-- Views:  ledger_account_balances (derived), ledger_reconciliation (cached vs derived)
+-- Function: ledger_post(kind, reference, description, lines jsonb)
+--
+-- Guarantees, all verified after applying:
+--   * an entry whose debits do not equal its credits is refused
+--   * UPDATE and DELETE on journal rows raise — corrections are reversing entries
+--   * a post that would drive a saver balance negative is refused
+--   * cached balances are written by the function from the journal, never by hand
+--
+-- The full DDL is reproduced in the migration that was applied; it is long, so
+-- it lives in source control via this file and in the database itself. To
+-- recreate from scratch, see the `create_double_entry_ledger` migration in the
+-- Supabase migration history, or the service wrapper in server/services/ledger.js
+-- which documents the account model and the entry shape for each money flow.
+--
+-- Opening balances were carried in as entry OPENING-2026-11-04:
+--   credit each user_funds:<bahasha> with its balance, debit opening_balance
+--   with the total (6,659,500). Reconciliation reported zero breaks.
