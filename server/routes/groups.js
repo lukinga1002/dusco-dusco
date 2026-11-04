@@ -4,6 +4,7 @@ const { authenticateToken } = require('../middleware/auth');
 const { collectPayment } = require('../services/payment');
 const { SETTLEMENT_NETWORK } = require('../services/payment.types');
 const { authorizeWithdrawal, releaseAllowance } = require('../services/kyc');
+const { withIdempotency } = require('../services/idempotency');
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -121,7 +122,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/groups/:id/contribute — Simulate contribution
-router.post('/:id/contribute', async (req, res) => {
+router.post('/:id/contribute', withIdempotency('groups.contribute'), async (req, res) => {
   try {
     const gid = req.params.id;
     const { type, sourceNetwork } = req.body; // type: shares, social, both
@@ -164,7 +165,7 @@ router.post('/:id/contribute', async (req, res) => {
 });
 
 // POST /api/groups/:id/withdraw — Withdraw from group bahasha
-router.post('/:id/withdraw', async (req, res) => {
+router.post('/:id/withdraw', withIdempotency('groups.withdraw'), async (req, res) => {
   try {
     const gid = req.params.id;
     const { bahashaId, amount, destinationPhone, destinationNetwork, purpose, pin } = req.body;

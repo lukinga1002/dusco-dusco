@@ -45,12 +45,15 @@ async function request(path, opts = {}) {
     query,
     timeout = 95000,
     admin = false,
+    idempotencyKey,
   } = opts;
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
 
   const headers = { "Content-Type": "application/json" };
+  // Money-moving calls carry a key so a retry has one effect, not two.
+  if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
   if (auth) {
     const token = admin ? getAdminToken() : getToken();
     if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -112,8 +115,8 @@ export const api = {
   deleteWallet: (id, body) => request(`/wallets/${id}`, { method: "DELETE", body: body || {} }),
 
   // ---- Transactions ----
-  deposit: (body) => request("/transactions/deposit", { method: "POST", body }),
-  withdraw: (body) => request("/transactions/withdraw", { method: "POST", body }),
+  deposit: (body, idempotencyKey) => request("/transactions/deposit", { method: "POST", body, idempotencyKey }),
+  withdraw: (body, idempotencyKey) => request("/transactions/withdraw", { method: "POST", body, idempotencyKey }),
   getTransactions: (query) => request("/transactions", { query }),
   feePreview: (query) => request("/transactions/fee-preview", { query }),
 
