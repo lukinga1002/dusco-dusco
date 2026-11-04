@@ -29,7 +29,7 @@ money are separate systems that each believe they are authoritative.
 
 ## 1. Findings
 
-### [CRITICAL] Withdrawal PIN, identity tier and limits are client-side only — complete bypass
+### [CRITICAL — FIXED 2026-11-04] Withdrawal PIN, identity tier and limits are client-side only — complete bypass
 
 **Location:** `base44/functions/authorizeWithdrawal/entry.ts`; `src/components/dusco/security/PinPrompt.jsx:25`;
 `src/components/dusco/send/SendReview.jsx:25`; `src/components/dusco/send/useSendMoney.js:38`;
@@ -55,7 +55,7 @@ burn it. Option (a) is simpler and keeps one source of truth.
 
 ---
 
-### [CRITICAL] Deposits credit from a client-supplied amount with no provider verification
+### [CRITICAL — FIXED 2026-11-04] Deposits credit from a client-supplied amount with no provider verification
 
 **Location:** `dusco/server/routes/transactions.js` (`POST /deposit`);
 `src/components/dusco/deposit/useDeposit.js:24`; `src/lib/depositMethods.js`
@@ -82,7 +82,7 @@ exists, the deposit route must be restricted to non-production use.
 
 ---
 
-### [HIGH] Balance read-then-write with no lock — concurrent withdrawals can overdraw
+### [HIGH — FIXED 2026-11-04] Balance read-then-write with no lock — concurrent withdrawals can overdraw
 
 **Location:** `dusco/server/routes/transactions.js` (withdraw)
 
@@ -100,7 +100,7 @@ a transaction, and add a CHECK constraint forbidding negative balances.
 
 ---
 
-### [HIGH] Funds are disbursed before the debit is recorded
+### [HIGH — FIXED 2026-11-04] Funds are disbursed before the debit is recorded
 
 **Location:** `dusco/server/routes/transactions.js` (withdraw)
 
@@ -157,7 +157,7 @@ at the datastore, not in application code.
 
 ---
 
-### [HIGH] Monthly withdrawal limit has a race, and is consumed at authorization rather than settlement
+### [HIGH — FIXED 2026-11-04] Monthly withdrawal limit has a race, and is consumed at authorization rather than settlement
 
 **Location:** `base44/functions/authorizeWithdrawal/entry.ts`
 
@@ -250,3 +250,32 @@ provides no cross-tenant isolation guarantee beyond app-level privacy.
 4. Atomic conditional debits + CHECK constraint; integers in minor units; idempotency keys.
 5. Complete RLS Phase 1 (already prepared — needs the service-role key in Render).
 6. Then ledger and reconciliation.
+
+---
+
+## 5. Fixes applied 2026-11-04
+
+Shipped to the Dusco Express API (master → Render) and `client-v2`:
+
+- **Tier, PIN and limits moved into Postgres** (`kyc_profiles`, migration 005) and enforced
+  inside the personal and group withdrawal routes. A client-side authorization result is no
+  longer involved. The PIN scheme was carried over unchanged because it was well built.
+- **Users cannot raise their own tier.** `/security/verify` records details only; the tier is
+  set by review.
+- **The deposit simulator refuses to run whenever the payment provider is configured**, so it
+  closes by itself the moment real credentials exist rather than depending on a flag someone
+  must remember to set.
+- **The debit is now conditional (`gte`) and happens before the payout**, with the balance
+  restored and the monthly allowance released if the payout fails.
+- **The monthly allowance is claimed atomically**, so concurrent withdrawals cannot both fit
+  under the cap.
+
+Verified against the live API: a withdrawal with no PIN is refused; wrong PIN, weak PIN,
+over-limit and tier checks all behave; a valid withdrawal succeeds; two racing 150,000
+withdrawals against a 237,050 balance produced exactly one success and no overdraw; and the
+simulator is refused once provider credentials are present.
+
+**Still open and unchanged:** floats for money on both backends, no idempotency keys, the
+non-unique `GroupContribution.payment_reference`, no ledger or double-entry, no reconciliation
+between the two backends, RLS still disabled, and admin tools without maker-checker, MFA or an
+audit trail.
