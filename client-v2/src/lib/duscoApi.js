@@ -130,6 +130,13 @@ export const api = {
   consentHistory: () => request("/consent/history"),
   recordConsent: (body) => request("/consent", { method: "POST", body }),
 
+  // ---- Security: identity tier, transaction PIN, withdrawal limits ----
+  // The server enforces these on the withdrawal itself; these endpoints only
+  // let the UI show state and set a PIN.
+  getSecurity: () => request("/security"),
+  setPin: (body) => request("/security/pin", { method: "POST", body }),
+  submitVerification: (body) => request("/security/verify", { method: "POST", body }),
+
   // ---- Data rights (PDPA access, portability, erasure) ----
   exportData: (body) => request("/account/export", { method: "POST", body }),
   deletionPreview: () => request("/account/deletion-preview"),

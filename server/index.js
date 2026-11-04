@@ -12,6 +12,7 @@ const groupRoutes = require('./routes/groups');
 const webhookRoutes = require('./routes/webhooks');
 const consentRoutes = require('./routes/consent');
 const accountRoutes = require('./routes/account');
+const securityRoutes = require('./routes/security');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -35,6 +36,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/consent', consentRoutes);
 app.use('/api/account', accountRoutes);
+app.use('/api/security', securityRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

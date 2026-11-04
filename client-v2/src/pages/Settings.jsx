@@ -8,6 +8,7 @@ import { useDuscoAuth } from "@/lib/DuscoAuthContext";
 import { api } from "@/lib/duscoApi";
 import QueryFeedback from "@/components/dusco/QueryFeedback";
 import ConsentSettings from "@/components/dusco/ConsentSettings";
+import SecuritySettings from "@/components/dusco/security/SecuritySettings";
 import LanguagePicker from "@/components/dusco/LanguagePicker";
 import { useLanguage } from "@/lib/i18n";
 import DownloadMyData from "@/components/dusco/DownloadMyData";
@@ -77,6 +78,10 @@ export default function Settings() {
         <h2 className="font-display text-lg font-semibold">Language</h2>
         <p className="text-sm text-muted-foreground">Saved to your account, so it follows you to any device.</p>
         <LanguagePicker value={language} onChange={changeLanguage} ariaLabel="Language" />
+      </section>
+      <section className="space-y-3 rounded-2xl border bg-card p-5">
+        <h2 className="font-display text-lg font-semibold">Security</h2>
+        <SecuritySettings />
       </section>
       <section className="space-y-3 rounded-2xl border bg-card p-5">
         <h2 className="font-display text-lg font-semibold">Your consent</h2>

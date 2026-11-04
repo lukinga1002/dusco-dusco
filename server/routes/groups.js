@@ -3,6 +3,7 @@ const { supabase, getUniqueDuscoNumber } = require('../db/database');
 const { authenticateToken } = require('../middleware/auth');
 const { collectPayment } = require('../services/payment');
 const { SETTLEMENT_NETWORK } = require('../services/payment.types');
+const { authorizeWithdrawal, releaseAllowance } = require('../services/kyc');
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -166,7 +167,7 @@ router.post('/:id/contribute', async (req, res) => {
 router.post('/:id/withdraw', async (req, res) => {
   try {
     const gid = req.params.id;
-    const { bahashaId, amount, destinationPhone, destinationNetwork, purpose } = req.body;
+    const { bahashaId, amount, destinationPhone, destinationNetwork, purpose, pin } = req.body;
 
     const { data: membership } = await supabase.from('group_members').select('role').eq('group_id', gid).eq('user_id', req.userId).maybeSingle();
     if (!membership || (membership.role !== 'admin' && membership.role !== 'treasurer')) {
@@ -175,13 +176,32 @@ router.post('/:id/withdraw', async (req, res) => {
 
     const { data: bahasha } = await supabase.from('group_bahashas').select('*').eq('id', bahashaId).eq('group_id', gid).single();
     if (!bahasha) return res.status(404).json({ error: 'Bahasha not found' });
-    if (amount > bahasha.balance) return res.status(400).json({ error: 'Insufficient balance' });
+
+    // Group money needs Full verification plus the PIN, enforced here rather
+    // than in the browser. Role alone is not enough: a hijacked treasurer
+    // session could otherwise drain a kikoba.
+    try {
+      await authorizeWithdrawal({ userId: req.userId, amount, pin, channel: 'group' });
+    } catch (gate) {
+      return res.status(gate.statusCode || 403).json({ error: gate.message, code: gate.code });
+    }
+
+    const { data: debited } = await supabase
+      .from('group_bahashas')
+      .update({ balance: bahasha.balance - amount })
+      .eq('id', bahashaId)
+      .eq('group_id', gid)
+      .gte('balance', amount)
+      .select();
+    if (!debited || debited.length === 0) {
+      await releaseAllowance(req.userId, amount);
+      return res.status(400).json({ error: 'Insufficient balance' });
+    }
 
     const fee = Math.max(500, Math.min(Math.round(amount * 0.01), 5000));
     if (fee >= amount) return res.status(400).json({ error: `Amount too small — it must be more than the TZS ${fee.toLocaleString()} fee.` });
     // Fee-inclusive: `amount` leaves the bahasha; recipient receives amount - fee
     const netSent = amount - fee;
-    await supabase.from('group_bahashas').update({ balance: bahasha.balance - amount }).eq('id', bahashaId);
     await supabase.from('group_transactions').insert({ group_id: gid, user_id: req.userId, group_bahasha_id: bahashaId, type: 'withdrawal', amount: -amount, fee, description: (purpose || `Withdrawal from ${bahasha.name}`) + ` · sent TZS ${netSent.toLocaleString()}, fee TZS ${fee.toLocaleString()}`, reference: `GWD-${Date.now()}` });
 
     res.json({ message: 'Withdrawal processed (auto-approved for demo)', amount, netSent, fee, bahashaName: bahasha.name, note: 'In production, this requires member approval' });
