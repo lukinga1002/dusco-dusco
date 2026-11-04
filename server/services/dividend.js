@@ -8,6 +8,7 @@
  */
 
 const { supabase } = require('../db/database');
+const ledger = require('./ledger');
 const { bulkPayout } = require('./payment');
 
 async function calculateDividendProjection(userId) {
@@ -66,7 +67,11 @@ async function simulateDividendDistribution() {
     const targetBahasha = bahashas[0]; // largest balance
 
     // Credit the dividend
-    await supabase.from('bahashas').update({ balance: targetBahasha.balance + dividend }).eq('id', targetBahasha.id);
+    await ledger.post({
+      kind: 'dividend', reference: `DIV-${targetBahasha.id}-${Date.now()}`,
+      description: 'Dividend credited', 
+      lines: ledger.dividendLines({ bahashaId: targetBahasha.id, amount: dividend }),
+    });
 
     // Record transaction
     await supabase.from('transactions').insert({

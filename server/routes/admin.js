@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { supabase } = require('../db/database');
+const ledger = require('../services/ledger');
 const { authenticateAdmin, JWT_SECRET } = require('../middleware/auth');
 const { simulateDividendDistribution } = require('../services/dividend');
 
@@ -127,6 +128,16 @@ router.post('/dividends/distribute', async (req, res) => {
   try {
     const result = await simulateDividendDistribution();
     res.json({ message: `Dividends distributed to ${result.distributed} users`, ...result });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// GET /api/admin/reconciliation — cached balances against the journal.
+// A non-zero difference, or debits not equalling credits, is a break that needs
+// investigating rather than a number to adjust.
+router.get('/reconciliation', authenticateAdmin, async (req, res) => {
+  try {
+    const result = await ledger.reconcile();
+    res.status(result.balanced && result.breaks.length === 0 ? 200 : 409).json(result);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

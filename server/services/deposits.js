@@ -9,6 +9,7 @@
  */
 
 const { supabase } = require('../db/database');
+const ledger = require('./ledger');
 const { SETTLEMENT_NETWORK } = require('./payment.types');
 
 function crossNetworkFee(amount, sourceNetwork) {
@@ -47,13 +48,22 @@ async function applyIncomingCollection({ userId, amount, sourceNetwork, senderPh
   const now = new Date().toISOString();
   for (const split of splits) {
     const current = bahashas.find(b => b.id === split.bahashaId).balance;
-    await supabase.from('bahashas').update({ balance: current + split.amount }).eq('id', split.bahashaId);
     await supabase.from('transactions').insert({
       user_id: userId, bahasha_id: split.bahashaId, type: 'deposit', amount: split.amount,
       source_network: sourceNetwork, reference,
       description: `Deposit - ${split.bahashaName} (${split.percentage}%)`, held_since: now,
     });
   }
+
+  // One balanced entry for the whole deposit: the provider owes us the gross,
+  // we owe the savers their splits, and we keep the fee. Posting also updates
+  // the cached balances, so no balance is written by hand above.
+  await ledger.post({
+    kind: 'deposit',
+    reference: `DEP-${reference}`,
+    description: `Deposit via ${sourceNetwork}`,
+    lines: ledger.depositLines({ gross: amount, fee, splits }),
+  });
 
   if (fee > 0) {
     await supabase.from('transactions').insert({
